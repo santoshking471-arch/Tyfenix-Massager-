@@ -129,28 +129,30 @@
         const db = getDatabase(app);
 
         window.googleLogin = function () {
-            const provider = new GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
 
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    const user = result.user;
+    // ⭐ Force account chooser popup
+    provider.setCustomParameters({
+        prompt: "select_account"
+    });
 
-                    // 🔥 Save user in database
-                    set(ref(db, "users/" + user.uid), {
-                        name: user.displayName,
-                        email: user.email,
-                        photo: user.photoURL,
-                        uid: user.uid
-                    });
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            const user = result.user;
 
-                    alert("Welcome " + user.displayName);
+            set(ref(db, "users/" + user.uid), {
+                name: user.displayName,
+                email: user.email,
+                photo: user.photoURL,
+                uid: user.uid
+            });
 
-                    // 🔥 Redirect
-                    window.location.href = "home.html";
-                })
-                .catch((error) => {
-                    alert(error.message);
-                });
+            alert("Welcome " + user.displayName);
+            window.location.href = "home.html";
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
         }
     </script>
 
