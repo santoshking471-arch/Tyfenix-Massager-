@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tyfenix Massager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+
+  <style>
+    body {
+      margin:0;
+      font-family:sans-serif;
+      background:#020617;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+
+    .box {
+      background:#0f172a;
+      padding:25px;
+      border-radius:15px;
+      width:300px;
+      text-align:center;
+    }
+
+    input {
+      width:100%;
+      padding:10px;
+      margin:10px 0;
+      border:none;
+      border-radius:10px;
+      background:#020617;
+      color:white;
+    }
+
+    button {
+      width:100%;
+      padding:10px;
+      background:#22c55e;
+      border:none;
+      border-radius:10px;
+      margin-top:10px;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Tyfenix OTP 🔥</h2>
+
+  <input id="phone" placeholder="+91XXXXXXXXXX">
+  <div id="recaptcha"></div>
+
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <input id="otp" placeholder="Enter OTP">
+  <button onclick="verifyOTP()">Verify</button>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', {
+  size: 'normal'
+});
+
+function sendOTP(){
+  let phone = document.getElementById("phone").value;
+
+  firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier)
+  .then(function(confirmationResult){
+    window.confirmationResult = confirmationResult;
+    alert("OTP Sent 😏");
+  })
+  .catch(function(error){
+    alert(error.message);
+  });
+}
+
+function verifyOTP(){
+  let code = document.getElementById("otp").value;
+
+  confirmationResult.confirm(code)
+  .then(function(result){
+    let user = result.user;
+
+    localStorage.setItem("user", user.phoneNumber);
+
+    alert("Login Success 🔥");
+    window.location.href = "chat.html";
+  })
+  .catch(function(error){
+    alert("Wrong OTP 😤");
+  });
+}
+</script>
+
+</body>
+</html>
