@@ -127,7 +127,7 @@ button{
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /* FIREBASE CONFIG */
@@ -157,15 +157,13 @@ onAuthStateChanged(auth, async (user)=>{
         document.getElementById("email").value = user.email;
         document.getElementById("uid").innerText = "UID: " + user.uid;
 
-        const snap = await get(ref(db,"users/"+user.uid));
+        onValue(ref(db, "users/" + user.uid), (snap) => {
+    if (snap.exists()) {
+        const data = snap.val();
 
-        if(snap.exists()){
-            const data = snap.val();
-
-            document.getElementById("nameInput").value = data.name || "";
-            document.getElementById("bioInput").value = data.bio || "";
-            document.getElementById("photo").src = data.photo || user.photoURL;
-        }
+        document.getElementById("nameInput").value = data.name || "";
+        document.getElementById("bioInput").value = data.bio || "";
+        document.getElementById("photo").src = data.photo || user.photoURL;
     }
 });
 
