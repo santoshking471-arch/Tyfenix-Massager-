@@ -144,11 +144,22 @@
         }
 
         function finish() {
-            const otp = document.getElementById('otp').value;
-            if(otp.length === 6) {
-                alert("Welcome to Tyfenix!");
-                // Redirect logic here
-            }
+    const otp = document.getElementById('otp').value;
+
+    if (!confirmationResult) {
+        alert("Pehle OTP lo");
+        return;
+    }
+
+    confirmationResult.confirm(otp)
+        .then((result) => {
+            const user = result.user;
+            alert("Welcome to Tyfenix!");
+            console.log(user);
+        })
+        .catch((error) => {
+            alert("Invalid OTP ❌");
+        });
         }
     </script>
 </body>
