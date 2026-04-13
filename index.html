@@ -120,8 +120,9 @@
                 <i class="fas fa-phone-alt"></i>
                 <input type="tel" id="mobile" placeholder="Mobile Number">
             </div>
-            <div id="recaptcha-container"></div>
+         
             <button class="btn" onclick="nextStep()">Send OTP</button>
+            <div id="recaptcha-container"></div>
         </div>
 
         <div id="otp-box" class="fade-in">
@@ -150,7 +151,7 @@ const auth = getAuth(app);
 let confirmationResult;
 
 window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-    size: 'invisible'
+    size: 'normal'
 });
 
 window.nextStep = function () {
