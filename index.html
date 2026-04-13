@@ -63,12 +63,6 @@
             align-items: center;
             margin-bottom: 20px;
             border: 1px solid transparent;
-            transition: 0.3s;
-        }
-
-        .input-group:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .input-group i { color: var(--accent); margin-right: 12px; font-size: 18px; }
@@ -95,14 +89,10 @@
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: 0.3s;
         }
 
         .btn:active { transform: scale(0.97); }
 
-        #otp-box { display: none; }
-
-        /* Animation */
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -115,84 +105,57 @@
             <p class="tagline">Super Fast Messenger</p>
         </div>
 
-        <div id="phone-box">
+        <div>
             <div class="input-group">
-                <i class="fas fa-phone-alt"></i>
-                <input type="tel" id="mobile" placeholder="Mobile Number">
+                <i class="fas fa-user"></i>
+                <input type="text" placeholder="Continue with Google">
             </div>
-         
-            <button class="btn" onclick="nextStep()">Send OTP</button>
-            <div id="recaptcha-container"></div>
-        </div>
 
-        <div id="otp-box" class="fade-in">
-            <div class="input-group">
-                <i class="fas fa-shield-alt"></i>
-                <input type="number" id="otp" placeholder="Enter OTP">
-            </div>
-            <button class="btn" onclick="finish()">Verify & Login</button>
+            <button class="btn" onclick="googleLogin()">Login with Google</button>
         </div>
     </div>
 
-    
-        <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
-  authDomain: "indian-chat-61159.firebaseapp.com",
-  projectId: "indian-chat-61159",
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+            authDomain: "indian-chat-61159.firebaseapp.com",
+            databaseURL: "https://indian-chat-61159-default-rtdb.firebaseio.com",
+            projectId: "indian-chat-61159",
+        };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-let confirmationResult;
+        window.googleLogin = function () {
+            const provider = new GoogleAuthProvider();
 
-window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-    size: 'normal'
-});
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
 
-window.nextStep = function () {
-    const num = document.getElementById('mobile').value;
+                    // 🔥 Save user in database
+                    set(ref(db, "users/" + user.uid), {
+                        name: user.displayName,
+                        email: user.email,
+                        photo: user.photoURL,
+                        uid: user.uid
+                    });
 
-    if(num.length === 10) {
-        const phoneNumber = "+91" + num;
+                    alert("Welcome " + user.displayName);
 
-        signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
-            .then((result) => {
-                confirmationResult = result;
-
-                document.getElementById('phone-box').style.display = 'none';
-                document.getElementById('otp-box').style.display = 'block';
-            })
-            .catch((error) => {
-                alert(error.message);
-            });
-
-    } else {
-        alert("Enter valid number");
-    }
-}
-
-window.finish = function () {
-    const otp = document.getElementById('otp').value;
-
-    if (!confirmationResult) {
-        alert("Pehle OTP lo");
-        return;
-    }
-
-    confirmationResult.confirm(otp)
-        .then(() => {
-            alert("Welcome to Tyfenix!");
-        })
-        .catch(() => {
-            alert("Invalid OTP ❌");
-        });
-}
-</script>
+                    // 🔥 Redirect
+                    window.location.href = "home.html";
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        }
     </script>
+
 </body>
 </html>
