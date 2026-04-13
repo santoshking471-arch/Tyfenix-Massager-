@@ -112,7 +112,7 @@
     <div class="login-card fade-in">
         <div class="logo-area">
             <div class="logo-text">TYFENIX</div>
-            <p class="tagline">Minimal Messenger</p>
+            <p class="tagline">Super Fast Messenger</p>
         </div>
 
         <div id="phone-box">
@@ -120,6 +120,7 @@
                 <i class="fas fa-phone-alt"></i>
                 <input type="tel" id="mobile" placeholder="Mobile Number">
             </div>
+            <div id="recaptcha-container"></div>
             <button class="btn" onclick="nextStep()">Send OTP</button>
         </div>
 
@@ -133,17 +134,48 @@
     </div>
 
     <script>
-        function nextStep() {
-            const num = document.getElementById('mobile').value;
-            if(num.length > 9) {
+        <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+  authDomain: "indian-chat-61159.firebaseapp.com",
+  projectId: "indian-chat-61159",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+let confirmationResult;
+
+window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    size: 'invisible'
+});
+
+window.nextStep = function () {
+    const num = document.getElementById('mobile').value;
+
+    if(num.length > 9) {
+        const phoneNumber = "+91" + num;
+
+        signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
+            .then((result) => {
+                confirmationResult = result;
+
                 document.getElementById('phone-box').style.display = 'none';
                 document.getElementById('otp-box').style.display = 'block';
-            } else {
-                alert("Enter valid number");
-            }
-        }
+            })
+            .catch((error) => {
+                alert(error.message);
+            });
 
-        function finish() {
+    } else {
+        alert("Enter valid number");
+    }
+}
+
+window.finish = function () {
     const otp = document.getElementById('otp').value;
 
     if (!confirmationResult) {
@@ -152,15 +184,14 @@
     }
 
     confirmationResult.confirm(otp)
-        .then((result) => {
-            const user = result.user;
+        .then(() => {
             alert("Welcome to Tyfenix!");
-            console.log(user);
         })
-        .catch((error) => {
+        .catch(() => {
             alert("Invalid OTP ❌");
         });
-        }
+}
+</script>
     </script>
 </body>
 </html>
