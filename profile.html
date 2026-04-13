@@ -150,22 +150,24 @@ const storage = getStorage(app);
 let currentUser;
 
 /* LOAD USER */
-onAuthStateChanged(auth, async (user)=>{
-    if(user){
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
         currentUser = user;
 
         document.getElementById("email").value = user.email;
         document.getElementById("uid").innerText = "UID: " + user.uid;
 
         onValue(ref(db, "users/" + user.uid), (snap) => {
-    if (snap.exists()) {
-        const data = snap.val();
+            if (snap.exists()) {
+                const data = snap.val();
 
-        document.getElementById("nameInput").value = data.name || "";
-        document.getElementById("bioInput").value = data.bio || "";
-        document.getElementById("photo").src = data.photo || user.photoURL;
+                document.getElementById("nameInput").value = data.name || "";
+                document.getElementById("bioInput").value = data.bio || "";
+                document.getElementById("photo").src = data.photo || user.photoURL;
+            }
+        });
     }
-});
+}); // ✅ THIS CLOSING WAS MISSING
 
 /* SAVE + UPLOAD DP */
 window.uploadDP = async function(){
