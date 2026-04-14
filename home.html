@@ -122,10 +122,10 @@
     <header>
         <div class="logo">Tyfenix</div>
         <div class="header-icons">
-            <i class="fas fa-qrcode" onclick="alert('Scanner Open')"></i>
-            <i class="fas fa-camera" onclick="alert('Camera Open')"></i>
-            <i class="fas fa-ellipsis-vertical" onclick="alert('Menu Open')"></i>
-        </div>
+    <i class="fas fa-qrcode" onclick="window.location.href='scanner.html'"></i>
+    <i class="fas fa-camera" onclick="window.location.href='camera.html'"></i>
+    <i class="fas fa-ellipsis-vertical" onclick="window.location.href='menu.html'"></i>
+    </div>
     </header>
 
     <div id="chats-page" class="page active">
@@ -220,6 +220,19 @@
                 item.classList.remove('active');
             });
             navElement.classList.add('active');
+        }
+        
+        
+        function openScanner(){
+             window.location.href = "scanner.html";
+        }
+
+        function openCamera(){
+             window.location.href = "camera.html";
+        }
+
+        function openMenu(){
+             window.location.href = "menu.html";
         }
 
         // Filter Chip Toggle
