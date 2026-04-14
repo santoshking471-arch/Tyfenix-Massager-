@@ -6,175 +6,193 @@
 <title>Camera</title>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+
 body{
-    margin:0;
     background:black;
-    color:white;
-    font-family:Arial;
     overflow:hidden;
 }
 
-/* CAMERA VIEW */
+/* CAMERA */
 video{
-    width:100%;
+    width:100vw;
     height:100vh;
     object-fit:cover;
 }
 
-/* BOTTOM BAR */
-.controls{
-    position:fixed;
-    bottom:20px;
-    width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:20px;
-}
-
 /* CAPTURE BUTTON */
 .capture{
-    width:70px;
-    height:70px;
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    width:65px;
+    height:65px;
     border-radius:50%;
     border:4px solid white;
     background:transparent;
 }
 
-/* SEND BUTTON */
-.send{
+/* ================= PREVIEW ================= */
+.preview{
     position:fixed;
-    right:20px;
-    bottom:30px;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:black;
+    display:none;
+}
+
+.preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* BOTTOM SEND BAR */
+.sendBar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:rgba(15,23,28,0.95);
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+}
+
+.sendBtn{
     background:#00f2c3;
     color:black;
     border:none;
-    padding:10px 14px;
+    padding:8px 14px;
     border-radius:10px;
     font-weight:bold;
 }
 
-/* CONTACT PANEL */
+/* ================= CONTACTS ================= */
 .contacts{
     position:fixed;
     top:0;
-    right:0;
-    width:220px;
+    left:0;
+    width:100vw;
     height:100vh;
     background:#0f171c;
-    overflow:auto;
-    padding:10px;
+    display:none;
+    flex-direction:column;
+    padding:15px;
 }
 
-.user{
-    padding:10px;
-    border-bottom:1px solid #222;
+.contactCard{
+    background:#161b22;
+    padding:12px;
+    border-radius:12px;
+    margin-bottom:10px;
+    color:white;
     cursor:pointer;
+    border:1px solid #222;
+}
+
+.title{
+    color:#00f2c3;
+    font-weight:bold;
+    margin-bottom:10px;
 }
 </style>
 </head>
 
 <body>
 
-<video id="video" autoplay></video>
+<!-- CAMERA -->
+<video id="video" autoplay playsinline></video>
 
-<div class="controls">
-    <button class="capture" onclick="capture()"></button>
+<button class="capture" onclick="capture()"></button>
+
+<!-- PREVIEW -->
+<div class="preview" id="preview">
+    <img id="previewImg">
+    
+    <div class="sendBar">
+        <span>Send this image</span>
+        <button class="sendBtn" onclick="openContacts()">Send To</button>
+    </div>
 </div>
 
-<button class="send" onclick="sendImage()">Send To</button>
-
+<!-- CONTACTS -->
 <div class="contacts" id="contacts">
-    <h4>Contacts</h4>
+    <div class="title">Select Contact</div>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, getDocs } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* FIREBASE CONFIG */  
-const firebaseConfig = {  
-  apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",  
-  authDomain: "indian-chat-61159.firebaseapp.com",  
-  databaseURL: "https://indian-chat-61159-default-rtdb.firebaseio.com",  
-  projectId: "indian-chat-61159",  
-  storageBucket: "indian-chat-61159.firebasestorage.app",  
-  messagingSenderId: "584142839677",  
-  appId: "1:584142839677:web:40cd744a7fe77dc743f614",  
-  measurementId: "G-5S9873P202"  
-};  
+const firebaseConfig = {
+  apiKey: "AIzaSyCA...",
+  authDomain: "indian-chat-61159.firebaseapp.com",
+  projectId: "indian-chat-61159"
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let currentUser;
-let selectedUser = null;
 let capturedImage = null;
+let selectedUser = null;
 
 /* CAMERA START */
-navigator.mediaDevices.getUserMedia({ video:true })
-.then(stream=>{
+navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:"user" }
+}).then(stream=>{
     document.getElementById("video").srcObject = stream;
 });
 
-/* LOAD CONTACTS */
-onAuthStateChanged(auth, async (user)=>{
-    if(!user) return;
-    currentUser = user;
-
-    const snap = await getDocs(collection(db,"users"));
-
-    snap.forEach(docu=>{
-        let data = docu.data();
-
-        if(docu.id !== user.uid){
-            let div = document.createElement("div");
-            div.className = "user";
-            div.innerText = data.name;
-
-            div.onclick = ()=> selectedUser = docu.id;
-
-            document.getElementById("contacts").appendChild(div);
-        }
-    });
-});
-
-/* CAPTURE IMAGE */
+/* CAPTURE */
 window.capture = function(){
-    let video = document.getElementById("video");
+    const video = document.getElementById("video");
 
-    let canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    let ctx = canvas.getContext("2d");
-    ctx.drawImage(video,0,0);
+    canvas.getContext("2d").drawImage(video,0,0);
 
-    capturedImage = canvas.toDataURL("image/png");
+    capturedImage = canvas.toDataURL("image/jpeg",0.85);
 
-    alert("Captured ✔");
+    document.getElementById("previewImg").src = capturedImage;
+    document.getElementById("preview").style.display = "block";
 };
 
-/* SEND IMAGE (demo) */
-window.sendImage = function(){
-    if(!selectedUser){
-        alert("Select contact first");
-        return;
-    }
+/* OPEN CONTACTS */
+window.openContacts = async function(){
 
-    if(!capturedImage){
-        alert("Capture image first");
-        return;
-    }
+    document.getElementById("contacts").style.display = "flex";
 
-    alert("Image ready to send (chat system next step)");
+    const snap = await getDocs(collection(db,"users"));
+
+    const box = document.getElementById("contacts");
+    box.innerHTML = `<div class="title">Select Contact</div>`;
+
+    snap.forEach(u=>{
+        let data = u.data();
+
+        let div = document.createElement("div");
+        div.className = "contactCard";
+        div.innerText = data.name;
+
+        div.onclick = ()=> selectedUser = u.id;
+
+        box.appendChild(div);
+    });
 };
 
 </script>
 
 </body>
-  </html>
+</html>
