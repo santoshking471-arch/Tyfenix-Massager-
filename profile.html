@@ -115,7 +115,7 @@ button{
     <!-- EMAIL (read only) -->
     <input type="text" id="email" readonly>
 
-    <button onclick="save collection ()">Save Profile</button>
+    <button onclick="UploadDP()">Save Profile</button>
 
     <div class="info" id="uid"></div>
 
@@ -127,7 +127,8 @@ button{
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /* FIREBASE CONFIG */
@@ -144,9 +145,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app);
+const db = getFirestore(app);
 const storage = getStorage(app);
-
 let currentUser;
 
 /* LOAD USER */
@@ -187,14 +187,14 @@ window.uploadDP = async function(){
         photoURL = await getDownloadURL(imgRef);
     }
 
-    /* SAVE TO DATABASE */
-    await set(ref(db,"users/"+currentUser.uid),{
-        name:name,
-        bio:bio,
-        email:currentUser.email,
-        photo:photoURL,
-        uid:currentUser.uid
-    });
+    /* SAVE TO COLLECTION */
+    await setDoc(doc(db, "users", currentUser.uid), {
+    name: name,
+    bio: bio,
+    email: currentUser.email,
+    photo: photoURL,
+    uid: currentUser.uid
+});
 
     document.getElementById("photo").src = photoURL;
 
