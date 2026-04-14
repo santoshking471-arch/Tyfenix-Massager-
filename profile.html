@@ -115,7 +115,7 @@ button{
     <!-- EMAIL (read only) -->
     <input type="text" id="email" readonly>
 
-    <button onclick="UploadDP()">Save Profile</button>
+    <button onclick="uploadDP()">Save Profile</button>
 
     <div class="info" id="uid"></div>
 
@@ -127,9 +127,20 @@ button{
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  onSnapshot 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { 
+  getStorage, 
+  ref as sRef, 
+  uploadBytes, 
+  getDownloadURL 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /* FIREBASE CONFIG */
 const firebaseConfig = {
