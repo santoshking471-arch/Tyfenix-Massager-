@@ -153,7 +153,7 @@
         <div class="header-icons">
     <i class="fas fa-qrcode" onclick="window.location.href='scanner.html'"></i>
     <i class="fas fa-camera" onclick="window.location.href='camera.html'"></i>
-    <i class="fas fa-ellipsis-vertical" onclick="toggleMenu()"></i>
+    <i class="fas fa-ellipsis-vertical" onclick="toggleMenu(event)"></i>
     </div>
     </header>
 
@@ -270,9 +270,10 @@
              window.location.href = "camera.html";
         }
 
-        function toggleMenu(){
-             const menu = document.getElementById("menuBox");
-                   menu.classList.toggle("show");
+        function toggleMenu(e){
+    e.stopPropagation(); // 🔥 ये main fix है
+    const menu = document.getElementById("menuBox");
+    menu.classList.toggle("show");
         }
         
         function menuClick(option){
@@ -311,15 +312,15 @@
     }
     } 
 
-        // Filter Chip Toggle
-        function toggleFilter(chip) {
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-        }
+        // Filter Chip Toggle  
+    function toggleFilter(chip) {  
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));  
+        chip.classList.add('active');  
+    }  
         document.addEventListener("click", function(e){
     const menu = document.getElementById("menuBox");
 
-    if(!e.target.closest(".fa-ellipsis-vertical") && !e.target.closest("#menuBox")){
+    if(!e.target.closest("#menuBox")){
         menu.classList.remove("show");
     }
 });
