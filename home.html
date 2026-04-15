@@ -181,7 +181,10 @@
             <div class="filter-chip" onclick="toggleFilter(this)">Work</div>
         </div>
         <div class="chat-list" id="chat-container">
-            <div class="list-item" onclick="alert('Opening Tyfenix Bot...')">
+            <div class="list-item" onclick="window.location.href='ai.html'">
+    Open Tyfenix AI
+</div>
+
                 <div class="item-icon"><i class="fas fa-robot"></i></div>
                 <div class="item-info">
                     <div class="item-name">Tyfenix AI</div>
@@ -275,7 +278,12 @@
     const menu = document.getElementById("menuBox");
     menu.classList.toggle("show");
         }
-        
+        function openTyfenix() {
+    // Aap yahan koi haptic feedback ya sound bhi add kar sakte hain
+    console.log("Redirecting to Tyfenix AI...");
+    window.location.href = 'ai.html';
+}
+
         function menuClick(option){
     console.log(option); // testing
 
