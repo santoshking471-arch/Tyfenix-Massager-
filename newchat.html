@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>New Chat</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+    --bg:#080d10;
+    --card:#0f171c;
+    --accent:#00f2c3;
+    --text:#f0f5f8;
+    --dim:#94a3b8;
+    --input:#1a242b;
+}
+
+/* 🔥 FULL SCREEN FIX */
+html,body{
+    height:100%;
+    width:100%;
+    background:var(--bg);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body{
+    display:flex;
+    flex-direction:column;
+}
+
+/* HEADER */
+header{
+    background:var(--card);
+    padding:10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-shrink:0;
+}
+
+header i{
+    font-size:16px;
+    color:var(--dim);
+}
+
+header input{
+    flex:1;
+    padding:8px 10px;
+    border:none;
+    border-radius:10px;
+    background:var(--input);
+    color:white;
+    outline:none;
+    font-size:13px;
+}
+
+/* MAIN */
+.container{
+    flex:1;
+    overflow-y:auto;
+    padding-bottom:20px;
+}
+
+/* OPTIONS */
+.option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:10px 12px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:var(--card);
+    border:1px solid #141e26;
+    font-size:13px;
+    cursor:pointer;
+}
+
+.option i{
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    background:rgba(0,242,195,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--accent);
+    font-size:14px;
+}
+
+.option:active{
+    background:#1a242b;
+}
+
+/* USER LIST */
+.user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:6px 12px;
+    padding:10px;
+    border-radius:12px;
+    background:var(--card);
+    border:1px solid #141e26;
+    cursor:pointer;
+}
+
+.user:active{
+    background:#1a242b;
+}
+
+.user img{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.name{
+    font-size:13px;
+    font-weight:600;
+}
+
+.saved{
+    font-size:11px;
+    color:var(--accent);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <i class="fas fa-arrow-left" onclick="history.back()"></i>
+    <input type="text" id="search" placeholder="Search contacts...">
+</header>
+
+<div class="container">
+
+    <!-- OPTIONS -->
+    <div class="option" onclick="addContact()">
+        <i class="fas fa-user-plus"></i>
+        Add New Contact
+    </div>
+
+    <div class="option" onclick="createGroup()">
+        <i class="fas fa-users"></i>
+        Create Group
+    </div>
+
+    <!-- LIST -->
+    <div id="list"></div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* 🔥 FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "indian-chat-61159.firebaseapp.com",
+  projectId: "indian-chat-61159"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+
+/* LOAD LOCAL CONTACTS */
+function loadLocal(){
+    const contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+
+    contacts.forEach(c=>{
+        list.innerHTML += `
+        <div class="user" onclick="openChat('${c.uid}')">
+            <img src="${c.photo || 'https://i.imgur.com/0y0y0y0.png'}">
+            <div>
+                <div class="name">${c.name}</div>
+                <div class="saved">Saved Contact</div>
+            </div>
+        </div>`;
+    });
+}
+
+/* LOAD FIREBASE USERS */
+async function loadUsers(){
+    try{
+        const snap = await getDocs(collection(db,"users"));
+
+        snap.forEach(doc=>{
+            const data = doc.data();
+
+            list.innerHTML += `
+            <div class="user" onclick="openChat('${doc.id}')">
+                <img src="${data.photo || 'https://i.imgur.com/0y0y0y0.png'}">
+                <div class="name">${data.name || "User"}</div>
+            </div>`;
+        });
+    }catch(e){
+        console.log("Firebase error:", e);
+    }
+}
+
+/* ADD CONTACT */
+window.addContact = function(){
+    const name = prompt("Enter Name");
+    const uid = prompt("Enter UID");
+
+    if(!name || !uid) return;
+
+    let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+    contacts.push({name, uid});
+
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+
+    alert("Saved ✅");
+    location.reload();
+}
+
+/* GROUP */
+window.createGroup = function(){
+    alert("Group feature coming 🔥");
+}
+
+/* OPEN CHAT */
+window.openChat = function(uid){
+    window.location.href = "chat.html?uid=" + uid;
+}
+
+/* SEARCH */
+document.getElementById("search").addEventListener("input", function(){
+    const val = this.value.toLowerCase();
+    document.querySelectorAll(".user").forEach(u=>{
+        u.style.display = u.innerText.toLowerCase().includes(val) ? "flex" : "none";
+    });
+});
+
+/* INIT */
+loadLocal();
+loadUsers();
+
+</script>
+
+</body>
+</html>
