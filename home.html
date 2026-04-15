@@ -63,18 +63,30 @@
 
         /* --- Chat/Item List Styles --- */
         .list-item {
-            display: flex;
-            padding: 10px 16px;
-            gap: 12px;
-            align-items: center;
-            border-bottom: 0.5px solid #141e26;
-            cursor: pointer;
-        }
-        .list-item:active { background: #1a242b; }
-        .item-icon { width: 40px; height: 40px; border-radius: 10px; background: #1a242b; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 18px; }
-        .item-info { flex: 1; }
-        .item-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-        .item-desc { font-size: 11px; color: var(--text-dim); }
+    cursor: pointer;
+    padding: 15px 25px;
+    margin: 10px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05); /* Glass effect */
+    color: #fff;
+    font-weight: 300;
+    text-align: center;
+    transition: all 0.3s ease;
+    
+    /* Neon Border & Glow */
+    border: 1px solid rgba(0, 242, 254, 0.5); 
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2), 
+                inset 0 0 5px rgba(0, 242, 254, 0.1);
+}
+
+.list-item:hover {
+    /* Hover karne par neon aur bright ho jayega */
+    border: 1px solid #00f2fe;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.6), 
+                inset 0 0 10px rgba(0, 242, 254, 0.4);
+    transform: translateY(-2px);
+}
+
 
         /* --- Ultra Slim Bottom Nav --- */
         nav {
@@ -180,10 +192,13 @@
             <div class="filter-chip" onclick="toggleFilter(this)">Groups</div>
             <div class="filter-chip" onclick="toggleFilter(this)">Work</div>
         </div>
-        <div class="chat-list" id="chat-container">
-            <div class="list-item" onclick="window.location.href='ai.html'">
-    Open Tyfenix AI
+        <div class="list-item" onclick="window.location.href='ai.html'">
+    <span style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <i data-lucide="bot" style="width: 18px; color: #00f2fe;"></i> 
+        Open Tyfenix AI
+    </span>
 </div>
+
 
                 <div class="item-icon"><i class="fas fa-robot"></i></div>
                 <div class="item-info">
