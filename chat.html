@@ -6,101 +6,55 @@
     <title>Tyfenix Slim Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg: #05080a;
-            --header: #0b0f13;
-            --accent: #00f2c3;
-            --purple: #a855f7;
-            --text-main: #f0f5f8;
-            --text-dim: #94a3b8;
-        }
-
+        :root { --bg: #05080a; --header: #0b0f13; --accent: #00f2c3; --purple: #a855f7; --text-main: #f0f5f8; --text-dim: #94a3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
-        /* --- Header Slim --- */
-        .header {
-            height: 44px; background: var(--header); display: flex; align-items: center; 
-            padding: 0 10px; gap: 8px; border-bottom: 0.5px solid rgba(255,255,255,0.08); flex-shrink: 0;
-        }
-        .user-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-        .dp-wrap {
-            width: 28px; height: 28px; padding: 1px; flex-shrink: 0;
-            background: linear-gradient(45deg, var(--accent), var(--purple));
-            border-radius: 8px; box-shadow: 0 0 8px rgba(0, 242, 195, 0.4);
-        }
+        .header { height: 44px; background: var(--header); display: flex; align-items: center; padding: 0 10px; gap: 8px; border-bottom: 0.5px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+        .user-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; cursor: pointer; }
+        .dp-wrap { width: 28px; height: 28px; padding: 1px; flex-shrink: 0; background: linear-gradient(45deg, var(--accent), var(--purple)); border-radius: 8px; box-shadow: 0 0 8px rgba(0, 242, 195, 0.4); }
         .dp-wrap img { width: 100%; height: 100%; border-radius: 7px; object-fit: cover; background: #151c22; }
         .u-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .header-actions { display: flex; gap: 12px; font-size: 14px; color: var(--text-dim); }
+        .u-status { font-size: 8px; transition: 0.3s; }
+        .online { color: var(--accent); } .offline { color: var(--text-dim); } .typing { color: var(--purple); font-style: italic; }
 
-        /* --- Chat View --- */
+        .header-actions { display: flex; gap: 12px; font-size: 14px; color: var(--text-dim); }
         .chat-view { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 
-        .msg-container { display: flex; flex-direction: column; max-width: 82%; }
-        .me { align-self: flex-end; }
-        .other { align-self: flex-start; }
-        .msg { padding: 8px 12px; font-size: 12px; border-radius: 12px; line-height: 1.4; }
+        .msg-container { display: flex; flex-direction: column; max-width: 82%; position: relative; }
+        .me { align-self: flex-end; } .other { align-self: flex-start; }
+        .msg { padding: 8px 12px; font-size: 12px; border-radius: 12px; line-height: 1.4; position: relative; }
         .me .msg { background: #162129; border: 0.5px solid rgba(0, 242, 195, 0.2); border-bottom-right-radius: 2px; }
         .other .msg { background: #0e141a; border: 0.5px solid rgba(255, 255, 255, 0.05); border-bottom-left-radius: 2px; }
-        
+
+        .tick { font-size: 9px; margin-left: 5px; float: right; margin-top: 4px; }
+        .tick.seen { color: #34b7f1; } .tick.delivered { color: var(--text-dim); }
+
         .del-btn { font-size: 9px; color: #ff4d4d; margin-top: 2px; cursor: pointer; display: none; text-align: right; }
         .me:active .del-btn { display: block; }
 
-        /* --- Fixed Typing Bar (Chota & Screen ke andar) --- */
-        .controls { 
-            background: var(--header); 
-            padding: 8px 0; 
-            flex-shrink: 0; 
-            border-top: 0.5px solid rgba(255,255,255,0.05);
-            width: 100%;
-        }
-        .input-row { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            width: 94%; /* 100% se kam kiya taaki side se bahar na jaye */
-            margin: 0 auto; /* Screen ke center mein rakhega */
-        }
-
-        .input-glow-box {
-            flex: 1; background: #141b21; border-radius: 20px; height: 34px;
-            display: flex; align-items: center; padding: 0 12px; 
-            border: 1px solid rgba(0, 242, 195, 0.3);
-            box-shadow: 0 0 10px rgba(0, 242, 195, 0.05);
-            min-width: 0; /* Bahar jane se rokta hai */
-        }
-        .input-glow-box input { 
-            flex: 1; background: transparent; border: none; outline: none; 
-            color: #fff; font-size: 12px; width: 100%;
-        }
-
-        .send-btn {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            display: flex; align-items: center; justify-content: center; 
-            color: #000; font-size: 14px; flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 242, 195, 0.3);
-        }
-
-        .plus-btn { color: var(--accent); font-size: 16px; flex-shrink: 0; }
+        .controls { background: var(--header); padding: 8px 0; flex-shrink: 0; border-top: 0.5px solid rgba(255,255,255,0.05); width: 100%; }
+        .input-row { display: flex; align-items: center; gap: 8px; width: 94%; margin: 0 auto; }
+        .input-glow-box { flex: 1; background: #141b21; border-radius: 20px; height: 34px; display: flex; align-items: center; padding: 0 12px; border: 1px solid rgba(0, 242, 195, 0.3); box-shadow: 0 0 10px rgba(0, 242, 195, 0.05); min-width: 0; }
+        .input-glow-box input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 12px; width: 100%; }
+        .send-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--purple)); display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px; flex-shrink: 0; }
     </style>
 </head>
 <body>
 
     <header class="header">
         <i class="fas fa-chevron-left" style="color:var(--accent); font-size: 14px;" onclick="history.back()"></i>
-        <div class="user-info">
+        <div class="user-info" onclick="window.location.href=`userprofile.html?uid=${new URLSearchParams(window.location.search).get('uid')}`">
             <div class="dp-wrap"><img id="uPhoto" src=""></div>
             <div class="u-details">
                 <div class="u-name" id="uName">Loading...</div>
-                <div style="font-size: 8px; color: var(--accent);">online</div>
+                <div class="u-status" id="uStatus">offline</div>
             </div>
         </div>
         <div class="header-actions">
-            <i class="fas fa-video" style="color:#ff4d4d" onclick="alert('Video Call...')"></i>
-            <i class="fas fa-phone" style="color:#34d399" onclick="alert('Voice Call...')"></i>
-            <i class="fas fa-ellipsis-vertical" onclick="alert('Menu')"></i>
+            <i class="fas fa-video" style="color:#ff4d4d" onclick="alert('Calling...')"></i>
+            <i class="fas fa-phone" style="color:#34d399" onclick="alert('Calling...')"></i>
+            <i class="fas fa-ellipsis-vertical"></i>
         </div>
     </header>
 
@@ -108,10 +62,10 @@
 
     <div class="controls">
         <div class="input-row">
+            <i class="fas fa-plus" style="color:var(--accent); font-size:16px;" onclick="document.getElementById('imgInp').click()"></i>
             <input type="file" id="imgInp" hidden accept="image/*">
-            <i class="fas fa-plus plus-btn" onclick="imgInp.click()"></i>
             <div class="input-glow-box">
-                <input type="text" id="msgInp" placeholder="Type message...">
+                <input type="text" id="msgInp" placeholder="Type message..." oninput="updateTyping(true)" onblur="updateTyping(false)">
             </div>
             <div class="send-btn" onclick="sendMsg()">
                 <i class="fas fa-paper-plane"></i>
@@ -122,58 +76,80 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, deleteDoc } 
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc } 
         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "indian-chat-61159.firebaseapp.com",
-            projectId: "indian-chat-61159",
-            storageBucket: "indian-chat-61159.appspot.com"
-        };
-
+        const firebaseConfig = { apiKey: "YOUR_API_KEY", authDomain: "indian-chat-61159.firebaseapp.com", projectId: "indian-chat-61159", storageBucket: "indian-chat-61159.appspot.com" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth();
         const otherUid = new URLSearchParams(window.location.search).get("uid");
+        const chatBox = document.getElementById("chat");
 
         function getChatId(a, b) { return a < b ? a + "_" + b : b + "_" + a; }
 
         onAuthStateChanged(auth, async user => {
             if(!user || !otherUid) return;
 
-            const snap = await getDoc(doc(db, "users", otherUid));
-            if(snap.exists()){
-                document.getElementById("uName").innerText = snap.data().name;
-                document.getElementById("uPhoto").src = snap.data().photo || "https://i.pravatar.cc/100";
-            }
+            // 1. Realtime Status & Typing Listen
+            onSnapshot(doc(db, "users", otherUid), (snap) => {
+                if(snap.exists()){
+                    const d = snap.data();
+                    document.getElementById("uName").innerText = d.name;
+                    document.getElementById("uPhoto").src = d.photo || "https://i.pravatar.cc/100";
+                    const s = document.getElementById("uStatus");
+                    if(d.typingId === user.uid) { s.innerText = "typing..."; s.className = "u-status typing"; }
+                    else { s.innerText = d.status || "offline"; s.className = "u-status " + (d.status === "online" ? "online" : "offline"); }
+                }
+            });
 
-            const q = query(collection(db, "chats", getChatId(user.uid, otherUid), "messages"), orderBy("time"));
+            // 2. Load Messages & Update Seen Status
+            const chatId = getChatId(user.uid, otherUid);
+            const q = query(collection(db, "chats", chatId, "messages"), orderBy("time"));
+            
             onSnapshot(q, s => {
                 chatBox.innerHTML = "";
                 s.forEach(d => {
                     const data = d.data();
-                    const container = document.createElement("div");
-                    container.className = "msg-container " + (data.sender === user.uid ? "me" : "other");
-                    container.innerHTML = `<div class="msg">${data.text}</div>${data.sender === user.uid ? `<span class="del-btn" onclick="delMsg('${d.id}')">Delete</span>` : ''}`;
-                    chatBox.appendChild(container);
+                    
+                    // Mark as Seen if other person sent it
+                    if(data.sender !== user.uid && !data.seen) {
+                        updateDoc(doc(db, "chats", chatId, "messages", d.id), { seen: true });
+                    }
+
+                    const div = document.createElement("div");
+                    div.className = "msg-container " + (data.sender === user.uid ? "me" : "other");
+                    
+                    let tickIcon = "";
+                    if(data.sender === user.uid) {
+                        const tickClass = data.seen ? "seen" : "delivered";
+                        tickIcon = `<span class="tick ${tickClass}"><i class="fas fa-check-double"></i></span>`;
+                    }
+
+                    div.innerHTML = `<div class="msg">${data.text} ${tickIcon}</div>${data.sender === user.uid ? `<span class="del-btn" onclick="delMsg('${d.id}')">Delete</span>` : ''}`;
+                    chatBox.appendChild(div);
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
         });
 
         window.sendMsg = async () => {
-            const val = msgInp.value.trim();
+            const val = document.getElementById("msgInp").value.trim();
             if(!val) return;
             await addDoc(collection(db, "chats", getChatId(auth.currentUser.uid, otherUid), "messages"), {
-                text: val, sender: auth.currentUser.uid, time: Date.now()
+                text: val, sender: auth.currentUser.uid, time: Date.now(), seen: false
             });
-            msgInp.value = "";
+            document.getElementById("msgInp").value = "";
+            updateTyping(false);
         };
 
-        window.delMsg = async (id) => {
-            if(confirm("Delete?")) await deleteDoc(doc(db, "chats", getChatId(auth.currentUser.uid, otherUid), "messages", id));
+        window.updateTyping = async (isTyping) => {
+            if(auth.currentUser) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { typingId: isTyping ? otherUid : null });
+            }
         };
+
+        window.delMsg = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "chats", getChatId(auth.currentUser.uid, otherUid), "messages", id)); };
     </script>
 </body>
 </html>
