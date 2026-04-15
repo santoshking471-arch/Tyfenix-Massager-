@@ -102,17 +102,23 @@
                     body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
                 });
 
-                const data = await response.json();
-                const aiReply = data.candidates[0].content.parts[0].text;
-                
-                addMessage(aiReply, 'ai');
-                saveToFirebase('ai', aiReply);
+                        const data = await response.json();
 
-                } catch (err) {
-        // Purani line hata kar ye niche wali line likhein
-        console.error("Dhyan se dekho error ye hai:", err);
-        addMessage("⚠️ Error: " + err.message, 'ai');
-    }
+        // Check karo agar data ya candidates gayab hain
+        if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const aiReply = data.candidates[0].content.parts[0].text;
+            addMessage(aiReply, 'ai');
+            saveToFirebase('ai', aiReply);
+        } else {
+            // Agar API ne reply nahi bheja toh error dikhao
+            console.log("Full Data:", data); // Check karne ke liye
+            if (data.error) {
+                addMessage("❌ API Error: " + data.error.message, 'ai');
+            } else {
+                addMessage("❌ Error: Gemini ne koi response nahi bheja. Check API status.", 'ai');
+            }
+        }
+
 
         }
 
