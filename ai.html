@@ -108,10 +108,12 @@
                 addMessage(aiReply, 'ai');
                 saveToFirebase('ai', aiReply);
 
-            } catch (err) {
-                console.error(err);
-                addMessage("Tyfenix is sleeping... check your API Key.", 'ai');
-            }
+                } catch (err) {
+        // Purani line hata kar ye niche wali line likhein
+        console.error("Dhyan se dekho error ye hai:", err);
+        addMessage("⚠️ Error: " + err.message, 'ai');
+    }
+
         }
 
         function submitChat() {
