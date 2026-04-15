@@ -221,8 +221,8 @@
         </div>
     </div>
 
-    <div class="fab" onclick="alert('Starting New Conversation...')">
-        <i class="fas fa-plus"></i>
+    <div class="fab" onclick="window.location.href='newchat.html'">
+    <i class="fas fa-plus"></i>
     </div>
 
     <nav>
@@ -312,6 +312,10 @@
     }
     } 
 
+    function openNewChat(){
+    window.location.href = "newchat.html";
+    }
+        
         // Filter Chip Toggle  
     function toggleFilter(chip) {  
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));  
