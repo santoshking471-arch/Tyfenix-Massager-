@@ -3,148 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tyfenix AI | Gemini Premium</title>
+    <title>Tyfenix AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <style>
-        body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .orb-neon { 
-            background: conic-gradient(from 180deg, #4facfe, #7062f5, #ff0f7b, #4facfe); 
-            filter: blur(15px); 
-        }
+        body { background-color: #050505; color: white; font-family: sans-serif; overflow: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
+        .orb-neon { background: conic-gradient(from 180deg, #4facfe, #7062f5, #ff0f7b, #4facfe); filter: blur(15px); }
+        .message-ai { background: rgba(255, 255, 255, 0.05); border-radius: 20px 20px 20px 5px; }
+        .message-user { background: rgba(255, 255, 255, 0.1); border-radius: 20px 20px 5px 20px; border: 1px solid rgba(0, 242, 254, 0.2); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .message-ai { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .message-user { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(0, 242, 254, 0.2); }
-        
-        /* Smooth Animation for Messages */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-msg { animation: fadeIn 0.3s ease forwards; }
     </style>
 </head>
 <body class="h-screen flex flex-col items-center">
 
     <div class="mt-10 flex flex-col items-center">
-        <div class="relative w-24 h-24 flex items-center justify-center">
-            <div id="orb-glow" class="absolute inset-0 orb-neon rounded-full opacity-40 animate-pulse"></div>
+        <div class="relative w-20 h-20 flex items-center justify-center">
+            <div class="absolute inset-0 orb-neon rounded-full opacity-40 animate-pulse"></div>
             <div class="absolute inset-1 bg-[#050505] rounded-full"></div>
-            <div class="w-16 h-16 orb-neon rounded-full animate-spin" style="animation-duration: 8s;"></div>
+            <div class="w-12 h-12 orb-neon rounded-full animate-spin" style="animation-duration: 6s;"></div>
         </div>
-        <h1 class="mt-6 text-xl font-light text-gray-300 tracking-widest uppercase">Tyfenix AI</h1>
+        <h1 class="mt-4 text-gray-400 tracking-[0.2em] text-sm uppercase">Tyfenix AI</h1>
     </div>
 
     <div id="chat-box" class="flex-1 w-full max-w-md px-5 mt-8 overflow-y-auto no-scrollbar pb-32 space-y-4">
-        <div id="suggestions" class="grid grid-cols-1 gap-3">
-            <button onclick="sendPrompt('I need relationship advice')" class="glass p-4 rounded-3xl flex items-center gap-4 active:scale-95 transition-all text-left">
-                <i data-lucide="heart" class="text-pink-500 w-5 h-5"></i>
-                <span class="text-sm text-gray-300 font-light">I need relationship advice</span>
+        <div id="suggestions" class="space-y-3">
+            <button onclick="sendMsg('I need relationship advice')" class="glass w-full p-4 text-left text-sm text-gray-400 flex items-center gap-3 active:scale-95 transition-all">
+                <i data-lucide="heart" class="w-4 h-4 text-pink-500"></i> I need relationship advice
             </button>
-            <button onclick="sendPrompt('Write a professional message')" class="glass p-4 rounded-3xl flex items-center gap-4 active:scale-95 transition-all text-left">
-                <i data-lucide="mail" class="text-cyan-400 w-5 h-5"></i>
-                <span class="text-sm text-gray-300 font-light">Write a message to a coworker</span>
+            <button onclick="sendMsg('Write a professional message')" class="glass w-full p-4 text-left text-sm text-gray-400 flex items-center gap-3 active:scale-95 transition-all">
+                <i data-lucide="mail" class="w-4 h-4 text-cyan-400"></i> Write a message to a coworker
             </button>
-            <button onclick="sendPrompt('Generate a cinematic AI image')" class="glass p-4 rounded-3xl flex items-center gap-4 active:scale-95 transition-all text-left">
-                <i data-lucide="image" class="text-purple-500 w-5 h-5"></i>
-                <span class="text-sm text-gray-300 font-light">I want to make a picture (Nano)</span>
+            <button onclick="sendMsg('Generate a cinematic AI image')" class="glass w-full p-4 text-left text-sm text-gray-400 flex items-center gap-3 active:scale-95 transition-all">
+                <i data-lucide="image" class="w-4 h-4 text-purple-500"></i> I want to make a picture (Nano)
             </button>
         </div>
     </div>
 
     <div class="fixed bottom-8 w-full max-w-md px-4">
-        <div class="glass flex items-center p-2 px-5 rounded-full shadow-2xl">
-            <i data-lucide="sparkles" class="w-5 h-5 text-purple-500 mr-2"></i>
-            <input id="user-input" type="text" placeholder="Ask Tyfenix Anything..." class="flex-1 bg-transparent outline-none py-2 text-sm font-light text-white">
-            <button onclick="submitChat()" class="bg-[#22C55E] p-2.5 rounded-full active:scale-90 transition-all">
-                <i data-lucide="send" id="btn-icon" class="w-4 h-4 text-black"></i>
+        <div class="glass flex items-center p-2 px-5">
+            <input id="user-input" type="text" placeholder="Ask Tyfenix Anything..." class="flex-1 bg-transparent outline-none py-2 text-sm text-white">
+            <button onclick="handleInput()" class="bg-[#22C55E] p-2.5 rounded-full active:scale-90 transition-all">
+                <i data-lucide="send" class="w-4 h-4 text-black"></i>
             </button>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
+        
+        // --- APNI NAYI KEY YAHAN DALO ---
+        const KEY = "AIzaSyAEL44xn3YLyaKZ1A7PmLPqrYIsSWhX8u4";
 
-        // --- 1. CONFIGURATIONS (Bas Inhe Replace Karein) ---
-        const firebaseConfig = {
-  apiKey: "AIzaSyCA49EYDbqUnYu1sXs0ETDMIGaWxtoxXOM",
-  authDomain: "reselling-store-c103e.firebaseapp.com",
-  databaseURL: "https://reselling-store-c103e-default-rtdb.firebaseio.com",
-  projectId: "reselling-store-c103e",
-  storageBucket: "reselling-store-c103e.firebasestorage.app",
-  messagingSenderId: "411682468136",
-  appId: "1:411682468136:web:79cc2b622148f42a62e01d"
-};
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // Load chat from memory
+        window.onload = () => {
+            const saved = JSON.parse(localStorage.getItem('tyfenix_chats') || "[]");
+            if(saved.length > 0) {
+                document.getElementById('suggestions').classList.add('hidden');
+                saved.forEach(msg => renderMessage(msg.txt, msg.sender));
+            }
+        };
 
-        const GEMINI_KEY = "AIzaSyAEL44xn3YLyaKZ1A7PmLPqrYlsSWhX8u4"; // Get from aistudio.google.com
-
-        // --- 2. CORE LOGIC ---
-        const chatBox = document.getElementById('chat-box');
-        const userInput = document.getElementById('user-input');
-
-        async function sendPrompt(text) {
+        async function sendMsg(text) {
             if(!text) return;
             document.getElementById('suggestions').classList.add('hidden');
             
-            addMessage(text, 'user');
-            saveToFirebase('user', text);
+            renderMessage(text, 'user');
+            saveChat(text, 'user');
 
             try {
-                // Gemini API Call
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
-                const response = await fetch(url, {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
                 });
 
-                        const data = await response.json();
-
-        // Check karo agar data ya candidates gayab hain
-        if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
-            const aiReply = data.candidates[0].content.parts[0].text;
-            addMessage(aiReply, 'ai');
-            saveToFirebase('ai', aiReply);
-        } else {
-            // Agar API ne reply nahi bheja toh error dikhao
-            console.log("Full Data:", data); // Check karne ke liye
-            if (data.error) {
-                addMessage("❌ API Error: " + data.error.message, 'ai');
-            } else {
-                addMessage("❌ Error: Gemini ne koi response nahi bheja. Check API status.", 'ai');
+                const data = await res.json();
+                
+                if (data.error) {
+                    renderMessage("❌ API Error: " + data.error.message, 'ai');
+                } else if (data.candidates && data.candidates[0]) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    renderMessage(reply, 'ai');
+                    saveChat(reply, 'ai');
+                }
+            } catch (e) {
+                renderMessage("⚠️ Network Error. Check connection.", 'ai');
             }
         }
 
-
+        function handleInput() {
+            const input = document.getElementById('user-input');
+            const val = input.value.trim();
+            if(val) { sendMsg(val); input.value = ''; }
         }
 
-        function submitChat() {
-            const val = userInput.value.trim();
-            if(val) { sendPrompt(val); userInput.value = ''; }
-        }
-
-        function addMessage(text, sender) {
+        function renderMessage(txt, sender) {
+            const box = document.getElementById('chat-box');
             const div = document.createElement('div');
-            div.className = `animate-msg p-4 rounded-3xl text-sm font-light leading-relaxed max-w-[85%] ${sender === 'user' ? 'ml-auto message-user text-white' : 'message-ai text-gray-300'}`;
-            div.innerText = text;
-            chatBox.appendChild(div);
-            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+            div.className = `p-4 max-w-[85%] text-sm leading-relaxed ${sender === 'user' ? 'ml-auto message-user text-white' : 'message-ai text-gray-300'}`;
+            div.innerText = txt;
+            box.appendChild(div);
+            box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
         }
 
-        function saveToFirebase(role, msg) {
-            db.collection("chats").add({
-                role: role,
-                text: msg,
-                time: firebase.firestore.FieldValue.serverTimestamp()
-            });
+        function saveChat(txt, sender) {
+            let chats = JSON.parse(localStorage.getItem('tyfenix_chats') || "[]");
+            chats.push({txt, sender});
+            localStorage.setItem('tyfenix_chats', JSON.stringify(chats));
         }
 
-        // Enter key support
-        userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") submitChat(); });
+        document.getElementById('user-input').addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleInput();
+        });
     </script>
 </body>
 </html>
