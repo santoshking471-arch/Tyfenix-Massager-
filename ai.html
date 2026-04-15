@@ -72,46 +72,46 @@
     saveChat(text, 'user');
 
     try {
-        // --- 2026 UPDATED STABLE URL ---
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+        // Exact wahi URL jo Google AI Studio ke curl mein hai
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${KEY}`;
         
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                contents: [{ parts: [{ text: text }] }] 
+            headers: { 
+                'Content-Type': 'application/json'
+                // JavaScript fetch mein API key ko header mein 'X-goog-api-key' 
+                // likhne ke bajaye URL mein likhna zyada safe aur asan hota hai.
+            },
+            body: JSON.stringify({
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "text": text
+                            }
+                        ]
+                    }
+                ]
             })
         });
 
         const data = await res.json();
         
-        if (data.error) {
-            // Agar v1 fail ho, toh ye v1beta try karega automatic
-            console.log("V1 Failed, trying V1Beta...");
-            const betaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
-            const resBeta = await fetch(betaUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-            });
-            const dataBeta = await resBeta.json();
-            
-            if(dataBeta.candidates) {
-                const reply = dataBeta.candidates[0].content.parts[0].text;
-                renderMessage(reply, 'ai');
-                saveChat(reply, 'ai');
-            } else {
-                renderMessage("❌ API Error: " + dataBeta.error.message, 'ai');
-            }
-        } else if (data.candidates && data.candidates[0]) {
+        if (data.candidates && data.candidates[0]) {
             const reply = data.candidates[0].content.parts[0].text;
             renderMessage(reply, 'ai');
             saveChat(reply, 'ai');
+        } else {
+            // Agar abhi bhi error aaye toh ye line asli wajah batayegi
+            const errorMsg = data.error ? data.error.message : "Response structure mismatch";
+            renderMessage("❌ Error: " + errorMsg, 'ai');
+            console.log("Full Data:", data);
         }
     } catch (e) {
-        renderMessage("⚠️ Connection Issue. Check Internet.", 'ai');
+        renderMessage("⚠️ System Error: " + e.message, 'ai');
     }
 }
+
 
 
         function handleInput() {
