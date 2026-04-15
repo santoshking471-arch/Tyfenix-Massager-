@@ -277,6 +277,13 @@
             document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
         }
+        document.addEventListener("click", function(e){
+    const menu = document.getElementById("menuBox");
+
+    if(!e.target.closest(".fa-ellipsis-vertical") && !e.target.closest("#menuBox")){
+        menu.classList.remove("show");
+    }
+});
     </script>
     <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
