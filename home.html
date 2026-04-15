@@ -268,9 +268,44 @@
         }
 
         function toggleMenu(){
-    const menu = document.getElementById("menuBox");
-    menu.classList.toggle("show");
+             const menu = document.getElementById("menuBox");
+                   menu.classList.toggle("show");
         }
+        
+        function menuClick(option){
+    console.log(option); // testing
+
+    if(option === "Settings"){
+        window.location.href = "settings.html";
+    }
+
+    else if(option === "New group"){
+        alert("Create Group UI next 😎");
+    }
+
+    else if(option === "New community"){
+        alert("Community feature coming");
+    }
+
+    else if(option === "Broadcast lists"){
+        alert("Broadcast feature coming");
+    }
+
+    else if(option === "Linked devices"){
+        alert("Linked devices coming");
+    }
+
+    else if(option === "Starred"){
+        alert("Starred messages");
+    }
+
+    else if(option === "Payments"){
+        alert("Payments feature");
+    }
+
+    else if(option === "Read all"){
+        alert("All chats marked read");
+    }
 
         // Filter Chip Toggle
         function toggleFilter(chip) {
