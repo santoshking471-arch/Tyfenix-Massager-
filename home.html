@@ -115,6 +115,32 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             cursor: pointer;
         }
+        .menu-box{
+    position: fixed;
+    top: 50px;
+    right: 8px;
+    width: 180px; /* 🔥 WhatsApp width */
+    background: #1f2c34;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    padding: 4px 0;
+    display: none;
+    z-index: 999;
+}
+
+/* ITEMS */
+.menu-box div{
+    padding: 10px 16px; /* 🔥 exact spacing */
+    font-size: 14px;
+    color: #e9edef;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* HOVER / TAP */
+.menu-box div:active{
+    background: #2a3942;
+}
     </style>
 </head>
 <body>
@@ -124,10 +150,20 @@
         <div class="header-icons">
     <i class="fas fa-qrcode" onclick="window.location.href='scanner.html'"></i>
     <i class="fas fa-camera" onclick="window.location.href='camera.html'"></i>
-    <i class="fas fa-ellipsis-vertical" onclick="window.location.href='menu.html'"></i>
+    <i class="fas fa-ellipsis-vertical" onclick="toggleMenu()"></i>
     </div>
     </header>
 
+    <div id="menuBox" class="menu-box">
+    <div onclick="menuClick('New group')">New group</div>
+    <div onclick="menuClick('New community')">New community</div>
+    <div onclick="menuClick('Broadcast lists')">Broadcast lists</div>
+    <div onclick="menuClick('Linked devices')">Linked devices</div>
+    <div onclick="menuClick('Starred')">Starred</div>
+    <div onclick="menuClick('Payments')">Payments</div>
+    <div onclick="menuClick('Read all')">Read all</div>
+    <div onclick="menuClick('Settings')">Settings</div>
+    </div>
     <div id="chats-page" class="page active">
         <div class="search-container">
             <div class="search-bar">
@@ -231,8 +267,9 @@
              window.location.href = "camera.html";
         }
 
-        function openMenu(){
-             window.location.href = "menu.html";
+        function toggleMenu(){
+    const menu = document.getElementById("menuBox");
+    menu.classList.toggle("show");
         }
 
         // Filter Chip Toggle
