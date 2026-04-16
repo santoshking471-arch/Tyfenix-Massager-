@@ -116,7 +116,8 @@
      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 
 // Firebase config (YOUR PROVIDED)
 const firebaseConfig = {
@@ -144,23 +145,37 @@ window.googleLogin = function () {
     prompt: "select_account"
   });
 
-  signInWithPopup(auth, provider)
+    signInWithPopup(auth, provider)
     .then(async (result) => {
       const user = result.user;
 
-      // ✅ SAVE TO FIRESTORE (users collection)
-      await addDoc(collection(db, "users"), {
-        name: user.displayName,
-        email: user.email,
-        uid: user.uid
-      });
+      // 1. यूजर के डॉक्यूमेंट का रेफरेंस लें (UID को ही ID बनायें)
+      const userRef = doc(db, "users", user.uid);
+      
+      // 2. चेक करें कि क्या यूजर पहले से मौजूद है?
+      const docSnap = await getDoc(userRef);
 
-      alert("Welcome " + user.displayName);
+      if (!docSnap.exists()) {
+        // अगर नया यूजर है, तभी डेटा सेव करें
+        await setDoc(userRef, {
+          name: user.displayName,
+          email: user.email,
+          uid: user.uid,
+          photo: user.photoURL || "",
+          createdAt: new Date().toISOString()
+        });
+        console.log("New User Account Created!");
+      } else {
+        console.log("Existing User Logged In.");
+      }
+
+      // 3. अब होम पेज पर भेजें
       window.location.href = "home.html";
     })
     .catch((error) => {
       alert(error.message);
     });
+
 };
     </script>
 
