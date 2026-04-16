@@ -96,9 +96,11 @@
         </form>
     </div>
 
-    <script type="module">
+        <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // ✅ auth को इम्पोर्ट करना ज़रूरी है
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
@@ -113,6 +115,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app); // ✅ Auth को इनिशियलाइज़ किया
 
         const form = document.getElementById('neonForm');
         const statusMsg = document.getElementById('status');
@@ -120,6 +123,13 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // ✅ लॉगिन यूजर की ID यहाँ से मिलेगी
+            const user = auth.currentUser;
+            if (!user) {
+                alert("कृपया पहले लॉगिन करें!");
+                return;
+            }
+
             const myUserId = user.uid; 
             const searchEmail = document.getElementById('email').value.toLowerCase().trim();
             const contactDisplayName = document.getElementById('name').value;
@@ -128,14 +138,19 @@
             statusMsg.style.color = "#00f3ff";
 
             try {
-                // Email Search in 'users' collection
+                // ✅ 'where' क्वेरी हटा दी ताकि Index/Permission की दिक्कत न आए
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, where("email", "==", searchEmail));
-                const querySnapshot = await getDocs(q);
+                const querySnapshot = await getDocs(usersRef);
 
-                if (!querySnapshot.empty) {
-                    const foundUser = querySnapshot.docs[0];
-                    const foundUserId = foundUser.id; ,
+                let foundUser = null;
+                querySnapshot.forEach((doc) => {
+                    if (doc.data().email === searchEmail) {
+                        foundUser = { id: doc.id, ...doc.data() };
+                    }
+                });
+
+                if (foundUser) {
+                    const foundUserId = foundUser.id; 
 
                     // Personal Contact Sub-collection
                     const myContactRef = doc(db, "users", myUserId, "contacts", foundUserId);
@@ -146,21 +161,22 @@
                         uid: foundUserId,
                         addedAt: new Date().toISOString()
                     });
-                    alert("Contact Success Full Added");
-                 }
 
                     statusMsg.innerText = "LINK ESTABLISHED";
                     statusMsg.style.color = "#bc13fe";
+                    alert("Contact Successfully Added!");
                     form.reset();
                 } else {
                     statusMsg.innerText = "DATABASE ERROR: NO EMAIL";
                     statusMsg.style.color = "#ff0055";
                 }
             } catch (err) {
+                console.error(err);
                 statusMsg.innerText = "ACCESS DENIED";
                 statusMsg.style.color = "#ff0055";
             }
         });
     </script>
+
 </body>
 </html>
