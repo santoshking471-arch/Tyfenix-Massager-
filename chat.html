@@ -74,90 +74,118 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc } 
-        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = {
-  apiKey: "AIzaSyCA49EYDbqUnYu1sXs0ETDMIGaWxtoxXOM",
-  authDomain: "reselling-store-c103e.firebaseapp.com",
-  databaseURL: "https://reselling-store-c103e-default-rtdb.firebaseio.com",
-  projectId: "reselling-store-c103e",
-  storageBucket: "reselling-store-c103e.firebasestorage.app",
-  messagingSenderId: "411682468136",
-  appId: "1:411682468136:web:79cc2b622148f42a62e01d"
-};
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth();
-        const otherUid = new URLSearchParams(window.location.search).get("uid");
-        const chatBox = document.getElementById("chat");
+    // ✅ आपकी सही वाली Indian-Chat Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+        authDomain: "indian-chat-61159.firebaseapp.com",
+        databaseURL: "https://indian-chat-61159-default-rtdb.firebaseio.com",
+        projectId: "indian-chat-61159",
+        storageBucket: "indian-chat-61159.firebasestorage.app",
+        messagingSenderId: "584142839677",
+        appId: "1:584142839677:web:40cd744a7fe77dc743f614",
+        measurementId: "G-5S9873P202"
+    };
 
-        function getChatId(a, b) { return a < b ? a + "_" + b : b + "_" + a; }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const otherUid = new URLSearchParams(window.location.search).get("uid");
+    const chatBox = document.getElementById("chat");
 
-        onAuthStateChanged(auth, async user => {
-            if(!user || !otherUid) return;
+    // Chat ID बनाने का सही तरीका
+    function getChatId(a, b) { return a < b ? a + "_" + b : b + "_" + a; }
 
-            // 1. Realtime Status & Typing Listen
-            onSnapshot(doc(db, "users", otherUid), (snap) => {
-                if(snap.exists()){
-                    const d = snap.data();
-                    document.getElementById("uName").innerText = d.name;
-                    document.getElementById("uPhoto").src = d.photo || "https://i.pravatar.cc/100";
-                    const s = document.getElementById("uStatus");
-                    if(d.typingId === user.uid) { s.innerText = "typing..."; s.className = "u-status typing"; }
-                    else { s.innerText = d.status || "offline"; s.className = "u-status " + (d.status === "online" ? "online" : "offline"); }
+    onAuthStateChanged(auth, async user => {
+        if(!user || !otherUid) {
+            alert("Session Error! Please login again.");
+            return;
+        }
+
+        // 1. दूसरे यूजर की प्रोफाइल और ऑनलाइन स्टेटस
+        onSnapshot(doc(db, "users", otherUid), (snap) => {
+            if(snap.exists()){
+                const d = snap.data();
+                document.getElementById("uName").innerText = d.name || "User";
+                document.getElementById("uPhoto").src = d.photo || "https://ui-avatars.com/api/?name=" + d.name;
+                
+                const s = document.getElementById("uStatus");
+                // Typing Status Logic
+                if(d.typingId === user.uid) { 
+                    s.innerText = "typing..."; 
+                    s.className = "u-status typing"; 
+                } else { 
+                    s.innerText = d.status || "offline"; 
+                    s.className = "u-status " + (d.status === "online" ? "online" : "offline"); 
                 }
-            });
-
-            // 2. Load Messages & Update Seen Status
-            const chatId = getChatId(user.uid, otherUid);
-            const q = query(collection(db, "chats", chatId, "messages"), orderBy("time"));
-            
-            onSnapshot(q, s => {
-                chatBox.innerHTML = "";
-                s.forEach(d => {
-                    const data = d.data();
-                    
-                    // Mark as Seen if other person sent it
-                    if(data.sender !== user.uid && !data.seen) {
-                        updateDoc(doc(db, "chats", chatId, "messages", d.id), { seen: true });
-                    }
-
-                    const div = document.createElement("div");
-                    div.className = "msg-container " + (data.sender === user.uid ? "me" : "other");
-                    
-                    let tickIcon = "";
-                    if(data.sender === user.uid) {
-                        const tickClass = data.seen ? "seen" : "delivered";
-                        tickIcon = `<span class="tick ${tickClass}"><i class="fas fa-check-double"></i></span>`;
-                    }
-
-                    div.innerHTML = `<div class="msg">${data.text} ${tickIcon}</div>${data.sender === user.uid ? `<span class="del-btn" onclick="delMsg('${d.id}')">Delete</span>` : ''}`;
-                    chatBox.appendChild(div);
-                });
-                chatBox.scrollTop = chatBox.scrollHeight;
-            });
+            }
         });
 
-        window.sendMsg = async () => {
-            const val = document.getElementById("msgInp").value.trim();
-            if(!val) return;
-            await addDoc(collection(db, "chats", getChatId(auth.currentUser.uid, otherUid), "messages"), {
-                text: val, sender: auth.currentUser.uid, time: Date.now(), seen: false
+        // 2. मैसेज लोड करना
+        const chatId = getChatId(user.uid, otherUid);
+        const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "asc"));
+        
+        onSnapshot(q, s => {
+            chatBox.innerHTML = "";
+            s.forEach(d => {
+                const data = d.data();
+                
+                // Seen status update
+                if(data.sender !== user.uid && !data.seen) {
+                    updateDoc(doc(db, "chats", chatId, "messages", d.id), { seen: true });
+                }
+
+                const div = document.createElement("div");
+                div.className = "msg-container " + (data.sender === user.uid ? "me" : "other");
+                
+                let tickIcon = "";
+                if(data.sender === user.uid) {
+                    tickIcon = `<span class="tick ${data.seen ? 'seen' : 'delivered'}"><i class="fas fa-check-double"></i></span>`;
+                }
+
+                div.innerHTML = `
+                    <div class="msg">${data.text} ${tickIcon}</div>
+                    ${data.sender === user.uid ? `<span class="del-btn" onclick="window.delMsg('${d.id}')">Delete</span>` : ''}
+                `;
+                chatBox.appendChild(div);
             });
-            document.getElementById("msgInp").value = "";
-            updateTyping(false);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // Global functions for buttons
+        window.sendMsg = async () => {
+            const inp = document.getElementById("msgInp");
+            const val = inp.value.trim();
+            if(!val) return;
+            
+            inp.value = ""; // तुरंत खाली करें
+            try {
+                await addDoc(collection(db, "chats", chatId, "messages"), {
+                    text: val,
+                    sender: user.uid,
+                    time: Date.now(),
+                    seen: false
+                });
+                updateTyping(false);
+            } catch(e) { alert("Send failed!"); }
         };
 
         window.updateTyping = async (isTyping) => {
-            if(auth.currentUser) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { typingId: isTyping ? otherUid : null });
-            }
+            await updateDoc(doc(db, "users", user.uid), { 
+                typingId: isTyping ? otherUid : null 
+            });
         };
 
-        window.delMsg = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "chats", getChatId(auth.currentUser.uid, otherUid), "messages", id)); };
-    </script>
+        window.delMsg = async (msgId) => {
+            if(confirm("Message डिलीट करें?")) {
+                await deleteDoc(doc(db, "chats", chatId, "messages", msgId));
+            }
+        };
+    });
+</script>
 </body>
 </html>
