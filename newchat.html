@@ -118,46 +118,60 @@
     import { getFirestore, collection, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyCA49EYDbqUnYu1sXs0ETDMIGaWxtoxXOM",
-  authDomain: "reselling-store-c103e.firebaseapp.com",
-  databaseURL: "https://reselling-store-c103e-default-rtdb.firebaseio.com",
-  projectId: "reselling-store-c103e",
-  storageBucket: "reselling-store-c103e.firebasestorage.app",
-  messagingSenderId: "411682468136",
-  appId: "1:411682468136:web:79cc2b622148f42a62e01d"
-};
+        apiKey: "AIzaSyCA49EYDbqUnYu1sXs0ETDMIGaWxtoxXOM",
+        authDomain: "reselling-store-c103e.firebaseapp.com",
+        databaseURL: "https://reselling-store-c103e-default-rtdb.firebaseio.com",
+        projectId: "reselling-store-c103e",
+        storageBucket: "reselling-store-c103e.firebasestorage.app",
+        messagingSenderId: "411682468136",
+        appId: "1:411682468136:web:79cc2b622148f42a62e01d"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
     const listDiv = document.getElementById("list");
 
+    // 1. चेक करें कि यूजर लॉग-इन है या नहीं
     onAuthStateChanged(auth, user => {
-        if (user) loadMyContacts(user.uid);
+        if (user) {
+            loadMyContacts(user.uid);
+        } else {
+            // अगर लॉग-इन नहीं है, तो टेस्टिंग के लिए अपनी ID यहाँ डाल सकते हैं
+            loadMyContacts("Santosh_Kushwaha"); 
+        }
     });
 
     function loadMyContacts(myUid) {
-        // Privacy Rule Check
-        onSnapshot(collection(db, "users", myUid, "myContacts"), (snap) => {
+        // ध्यान दें: यहाँ 'contacts' वही होना चाहिए जो 'addcontact.html' में सेव करते वक्त रखा था
+        const contactsRef = collection(db, "users", myUid, "contacts");
+
+        onSnapshot(contactsRef, (snap) => {
             if (snap.empty) {
-                listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--dim); font-size:11px;">Network Empty. Add a UID to connect.</div>`;
+                listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--dim); font-size:11px;">Network Empty. No connections found.</div>`;
                 return;
             }
-            listDiv.innerHTML = "";
+
+            listDiv.innerHTML = ""; // लिस्ट रीसेट करें
+            
             snap.forEach(cDoc => {
                 const cData = cDoc.data();
-                const uid = cData.uid;
+                const targetUid = cData.uid || cDoc.id; // दोस्त की UID
 
-                onSnapshot(doc(db, "users", uid), (uSnap) => {
+                // दोस्त की प्रोफाइल डिटेल्स (Photo/Online status) लाना
+                onSnapshot(doc(db, "users", targetUid), (uSnap) => {
                     const gData = uSnap.data();
-                    const existing = document.getElementById("u-" + uid);
+                    const existing = document.getElementById("u-" + targetUid);
                     const isOnline = gData?.status === 'online';
 
+                    // cData.name वो नाम है जो आपने सेव करते वक्त रखा था
                     const html = `
-                        <div class="dp-box"><img src="${gData?.photo || 'https://i.pravatar.cc/100'}"></div>
+                        <div class="dp-box">
+                            <img src="${gData?.photo || 'https://ui-avatars.com/api/?name=' + cData.name + '&background=0D141A&color=00F2C3'}">
+                        </div>
                         <div class="u-info">
-                            <div class="name">${cData.name}</div>
-                            <div class="status-txt">${isOnline ? 'Online' : 'Offline'}</div>
+                            <div class="name">${cData.name || "Unknown"}</div>
+                            <div class="status-txt">${isOnline ? 'Active Now' : 'Last seen recently'}</div>
                         </div>
                         <div class="status-dot ${isOnline ? 'active' : ''}"></div>
                     `;
@@ -167,16 +181,20 @@
                     } else {
                         const div = document.createElement("div");
                         div.className = "user";
-                        div.id = "u-" + uid;
-                        div.onclick = () => window.location.href = `chat.html?uid=${uid}`;
+                        div.id = "u-" + targetUid;
+                        div.onclick = () => window.location.href = `chat.html?uid=${targetUid}`;
                         div.innerHTML = html;
                         listDiv.appendChild(div);
                     }
                 });
             });
+        }, (err) => {
+            console.error("Firestore Error:", err);
+            listDiv.innerHTML = `<div style="color:red; font-size:10px; text-align:center;">Rules Error: ${err.code}</div>`;
         });
     }
 
+    // सर्च फिल्टर
     document.getElementById("search").oninput = function() {
         let val = this.value.toLowerCase();
         document.querySelectorAll(".user").forEach(u => {
