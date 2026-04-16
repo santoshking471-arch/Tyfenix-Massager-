@@ -120,7 +120,7 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const myUserId = "Santosh_Kushwaha"; 
+            const myUserId = user.uid; 
             const searchEmail = document.getElementById('email').value.toLowerCase().trim();
             const contactDisplayName = document.getElementById('name').value;
 
@@ -135,7 +135,7 @@
 
                 if (!querySnapshot.empty) {
                     const foundUser = querySnapshot.docs[0];
-                    const foundUserId = foundUser.id; 
+                    const foundUserId = foundUser.id; ,
 
                     // Personal Contact Sub-collection
                     const myContactRef = doc(db, "users", myUserId, "contacts", foundUserId);
@@ -146,6 +146,8 @@
                         uid: foundUserId,
                         addedAt: new Date().toISOString()
                     });
+                    alert("Contact Success Full Added");
+                 }
 
                     statusMsg.innerText = "LINK ESTABLISHED";
                     statusMsg.style.color = "#bc13fe";
