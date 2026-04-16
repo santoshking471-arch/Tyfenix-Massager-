@@ -117,33 +117,35 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    // ✅ आपकी सही वाली Firebase Config (Indian-Chat वाली)
     const firebaseConfig = {
-        apiKey: "AIzaSyCA49EYDbqUnYu1sXs0ETDMIGaWxtoxXOM",
-        authDomain: "reselling-store-c103e.firebaseapp.com",
-        databaseURL: "https://reselling-store-c103e-default-rtdb.firebaseio.com",
-        projectId: "reselling-store-c103e",
-        storageBucket: "reselling-store-c103e.firebasestorage.app",
-        messagingSenderId: "411682468136",
-        appId: "1:411682468136:web:79cc2b622148f42a62e01d"
+        apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+        authDomain: "indian-chat-61159.firebaseapp.com",
+        databaseURL: "https://indian-chat-61159-default-rtdb.firebaseio.com",
+        projectId: "indian-chat-61159",
+        storageBucket: "indian-chat-61159.firebasestorage.app",
+        messagingSenderId: "584142839677",
+        appId: "1:584142839677:web:40cd744a7fe77dc743f614",
+        measurementId: "G-5S9873P202"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth();
+    const auth = getAuth(app);
     const listDiv = document.getElementById("list");
 
-    // 1. चेक करें कि यूजर लॉग-इन है या नहीं
     onAuthStateChanged(auth, user => {
         if (user) {
+            console.log("Login User:", user.uid);
             loadMyContacts(user.uid);
         } else {
-            // अगर लॉग-इन नहीं है, तो टेस्टिंग के लिए अपनी ID यहाँ डाल सकते हैं
-            loadMyContacts("Santosh_Kushwaha"); 
+            // ❌ "Santosh_Kushwaha" वाली लाइन हटा दी, क्योंकि रूल्स सिर्फ असली UID को परमिशन देंगे
+            listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--dim); font-size:11px;">Please Login to see connections.</div>`;
         }
     });
 
     function loadMyContacts(myUid) {
-        // ध्यान दें: यहाँ 'contacts' वही होना चाहिए जो 'addcontact.html' में सेव करते वक्त रखा था
+        // ✅ रास्ता बिल्कुल सही: users -> [Your_UID] -> contacts
         const contactsRef = collection(db, "users", myUid, "contacts");
 
         onSnapshot(contactsRef, (snap) => {
@@ -152,19 +154,18 @@
                 return;
             }
 
-            listDiv.innerHTML = ""; // लिस्ट रीसेट करें
+            listDiv.innerHTML = ""; 
             
             snap.forEach(cDoc => {
                 const cData = cDoc.data();
-                const targetUid = cData.uid || cDoc.id; // दोस्त की UID
+                const targetUid = cData.uid; // दोस्त की UID
 
-                // दोस्त की प्रोफाइल डिटेल्स (Photo/Online status) लाना
+                // दोस्त की असली प्रोफाइल मंगाना
                 onSnapshot(doc(db, "users", targetUid), (uSnap) => {
                     const gData = uSnap.data();
                     const existing = document.getElementById("u-" + targetUid);
                     const isOnline = gData?.status === 'online';
 
-                    // cData.name वो नाम है जो आपने सेव करते वक्त रखा था
                     const html = `
                         <div class="dp-box">
                             <img src="${gData?.photo || 'https://ui-avatars.com/api/?name=' + cData.name + '&background=0D141A&color=00F2C3'}">
@@ -189,12 +190,11 @@
                 });
             });
         }, (err) => {
-            console.error("Firestore Error:", err);
-            listDiv.innerHTML = `<div style="color:red; font-size:10px; text-align:center;">Rules Error: ${err.code}</div>`;
+            console.error("Rules Error Detail:", err);
+            listDiv.innerHTML = `<div style="color:red; font-size:10px; text-align:center; padding:20px;">Rules Error: ${err.message}</div>`;
         });
     }
 
-    // सर्च फिल्टर
     document.getElementById("search").oninput = function() {
         let val = this.value.toLowerCase();
         document.querySelectorAll(".user").forEach(u => {
@@ -202,5 +202,6 @@
         });
     };
 </script>
+
 </body>
 </html>
