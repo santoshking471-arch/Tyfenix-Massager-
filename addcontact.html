@@ -206,8 +206,10 @@
                     statusMsg.style.color = "#ff0055";
                 }
             } catch (err) {
-                statusMsg.innerText = "SYSTEM ERROR";
-            }
+    console.error(err); // ये चेक करो कि ब्राउज़र के Console में क्या Error आ रहा है
+    statusMsg.innerText = "SYSTEM ERROR: " + err.code; 
+}
+
         });
     </script>
 </body>
