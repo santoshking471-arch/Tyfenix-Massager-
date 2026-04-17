@@ -347,27 +347,105 @@
         menu.classList.remove("show");
     }
 });
-    </script>
     <script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, query, onSnapshot, doc, getDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const auth = getAuth();
-const db = getDatabase();
+    // ✅ आपकी Indian-Chat वाली Config (इसे पक्का चेक कर लें)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+        authDomain: "indian-chat-61159.firebaseapp.com",
+        projectId: "indian-chat-61159",
+        storageBucket: "indian-chat-61159.firebasestorage.app",
+        messagingSenderId: "584142839677",
+        appId: "1:584142839677:web:40cd744a7fe77dc743f614"
+    };
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        onValue(ref(db, "users/" + user.uid), (snap) => {
-            if (snap.exists()) {
-                const data = snap.val();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const chatListContainer = document.getElementById("chat-list-container");
 
-                document.querySelector(".logo").innerHTML =
-                    `<img src="${data.photo}" style="width:22px;height:22px;border-radius:50%;margin-right:6px;"> ${data.name}`;
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            loadChatList(user.uid);
+        } else {
+            chatListContainer.innerHTML = `<div style="padding:20px; text-align:center;">Please Login</div>`;
+        }
+    });
+
+    async function loadChatList(myUid) {
+        // 1. 'chats' कलेक्शन को सुनें
+        const chatsRef = collection(db, "chats");
+
+        onSnapshot(chatsRef, (snapshot) => {
+            chatListContainer.innerHTML = ""; // लिस्ट साफ़ करें
+
+            let chatFound = false;
+
+            snapshot.forEach(async (chatDoc) => {
+                const chatId = chatDoc.id;
+
+                // 2. चेक करें कि क्या इस Chat ID में आपकी UID है
+                if (chatId.includes(myUid)) {
+                    chatFound = true;
+                    
+                    // दूसरे बंदे की ID निकालें
+                    const otherUid = chatId.replace(myUid, "").replace("_", "");
+                    
+                    // दूसरे बंदे का डेटा और आखिरी मैसेज मंगाएं
+                    renderChatItem(chatId, otherUid, myUid);
+                }
+            });
+
+            if(!chatFound) {
+                chatListContainer.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-dim); font-size:12px;">No recent chats.</div>`;
             }
         });
     }
-});
-    </script>
+
+    async function renderChatItem(chatId, otherUid, myUid) {
+        // दूसरे यूजर की प्रोफाइल लाएं
+        const userSnap = await getDoc(doc(db, "users", otherUid));
+        const userData = userSnap.data() || { name: "Unknown User", photo: "" };
+
+        // आखिरी मैसेज लाएं
+        const msgQuery = query(collection(db, "chats", chatId, "messages"), orderBy("time", "desc"), limit(1));
+        
+        onSnapshot(msgQuery, (msgSnap) => {
+            const lastMsgData = msgSnap.docs[0]?.data();
+            const lastMsgText = lastMsgData ? lastMsgData.text : "No messages yet";
+            const isUnread = lastMsgData && lastMsgData.sender !== myUid && !lastMsgData.seen;
+
+            // अगर पहले से ये चैट लिस्ट में है तो उसे हटाकर अपडेट करें (Realtime)
+            const oldItem = document.getElementById("chat-" + chatId);
+            if(oldItem) oldItem.remove();
+
+            const chatHtml = `
+                <div class="list-item" id="chat-${chatId}" onclick="window.location.href='chat.html?uid=${otherUid}'" 
+                     style="display:flex; align-items:center; text-align:left; gap:12px; padding:12px 16px; margin:5px 10px; border-radius:12px;">
+                    <img src="${userData.photo || 'https://ui-avatars.com/api/?name='+userData.name}" 
+                         style="width:45px; height:45px; border-radius:50%; border:1px solid var(--accent);">
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:14px; font-weight:600; color:#fff;">${userData.name}</span>
+                            <span style="font-size:10px; color:var(--text-dim);">${lastMsgData ? new Date(lastMsgData.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                            <p style="font-size:12px; color:${isUnread ? 'var(--accent)' : 'var(--text-dim)'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${lastMsgText}
+                            </p>
+                            ${isUnread ? '<div style="width:8px; height:8px; background:var(--accent); border-radius:50%; box-shadow:0 0 5px var(--accent);"></div>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatListContainer.insertAdjacentHTML('afterbegin', chatHtml);
+        });
+    }
+</script>
+
 
 </body>
 </html>
