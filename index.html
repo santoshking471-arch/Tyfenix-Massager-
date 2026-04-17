@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tyfenix | Login</title>
+    <title>Tyfenix | Authenticating</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg: #0c0f14;
             --card: #161b22;
             --accent: #00d2ff;
-            --accent-glow: rgba(0, 210, 255, 0.3);
             --text-dim: #8b949e;
         }
 
@@ -23,23 +22,22 @@
             justify-content: center;
             align-items: center;
             color: white;
+            overflow: hidden;
         }
 
         .login-card {
             width: 85%;
             max-width: 350px;
-            padding: 30px 20px;
+            padding: 40px 20px;
             background: var(--card);
-            border-radius: 28px;
+            border-radius: 30px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .logo-area { margin-bottom: 35px; }
-
         .logo-text {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 800;
             letter-spacing: 2px;
             background: linear-gradient(to right, #00d2ff, #3a7bd5);
@@ -48,52 +46,58 @@
         }
 
         .tagline {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-dim);
             margin-top: 5px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
 
-        .input-group {
-            background: #0d1117;
-            border-radius: 16px;
-            padding: 5px 15px;
+        /* --- Unique & Stylish Loader --- */
+        .loader-wrapper {
+            margin-top: 35px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
+            gap: 15px;
         }
 
-        .input-group i { color: var(--accent); margin-right: 12px; font-size: 18px; }
-
-        input {
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 12px 0;
-            width: 100%;
-            outline: none;
-            font-size: 16px;
+        .unique-spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--accent);
+            border-right: 3px solid rgba(0, 210, 255, 0.1);
+            border-bottom: 3px solid var(--accent);
+            border-left: 3px solid rgba(0, 210, 255, 0.1);
+            border-radius: 50%;
+            animation: spin-unique 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
         }
 
-        .btn {
-            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+        @keyframes spin-unique {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* --- Login Button (Hidden by default) --- */
+        #login-btn {
+            display: none;
+            margin-top: 35px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
             color: #000;
             width: 100%;
-            padding: 14px;
-            border-radius: 16px;
+            padding: 15px;
+            border-radius: 18px;
             border: none;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
         }
 
-        .btn:active { transform: scale(0.97); }
-
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -105,78 +109,80 @@
             <p class="tagline">Super Fast Messenger</p>
         </div>
 
-        <div>
-            
-
-            <button class="btn" onclick="googleLogin()">Login with Google</button>
+        <div id="auth-check" class="loader-wrapper">
+            <div class="unique-spinner"></div>
+            <p style="font-size: 10px; color: var(--text-dim);">Checking Neural Link...</p>
         </div>
+
+        <button id="login-btn" onclick="googleLogin()">Login with Google</button>
     </div>
 
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-// 🔥 setPersistence और browserLocalPersistence इम्पोर्ट किया
-import { 
-    getAuth, 
-    GoogleAuthProvider, 
-    signInWithPopup, 
-    setPersistence, 
-    browserLocalPersistence 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
-  authDomain: "indian-chat-61159.firebaseapp.com",
-  databaseURL: "https://indian-chat-61159-default-rtdb.firebaseio.com",
-  projectId: "indian-chat-61159",
-  storageBucket: "indian-chat-61159.firebasestorage.app",
-  messagingSenderId: "584142839677",
-  appId: "1:584142839677:web:40cd744a7fe77dc743f614",
-  measurementId: "G-5S9873P202"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+            authDomain: "indian-chat-61159.firebaseapp.com",
+            projectId: "indian-chat-61159",
+            storageBucket: "indian-chat-61159.firebasestorage.app",
+            messagingSenderId: "584142839677",
+            appId: "1:584142839677:web:40cd744a7fe77dc743f614"
+        };
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-window.googleLogin = async function () {
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
+        const loader = document.getElementById('auth-check');
+        const loginBtn = document.getElementById('login-btn');
 
-  try {
-    // 🛡️ 1. ये लाइन लॉगिन को हमेशा के लिए सेव कर देगी (जब तक Logout न करें)
-    await setPersistence(auth, browserLocalPersistence);
+        // 🔥 Background Login Check
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // अगर लॉगिन मिल गया, तो सीधे होम पर भेजें
+                window.location.href = "home.html";
+            } else {
+                // अगर लॉगिन नहीं है, तो लोडर हटाओ और बटन दिखाओ
+                loader.style.display = "none";
+                loginBtn.style.display = "block";
+                loginBtn.classList.add('fade-in');
+            }
+        });
 
-    // 2. अब पॉपअप दिखाओ
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+        window.googleLogin = async function() {
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: "select_account" });
+            
+            // बटन दबाने पर फिर से लोडर दिखाएं
+            loginBtn.style.display = "none";
+            loader.style.display = "flex";
 
-    const userRef = doc(db, "users", user.uid);
-    const docSnap = await getDoc(userRef);
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
 
-    if (!docSnap.exists()) {
-      await setDoc(userRef, {
-        name: user.displayName,
-        email: user.email,
-        uid: user.uid,
-        photo: user.photoURL || "",
-        createdAt: new Date().toISOString()
-      });
-      console.log("New User Account Created!");
-    }
+                const userRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(userRef);
 
-    // 3. होम पेज पर भेजें
-    window.location.href = "home.html";
-    
-  } catch (error) {
-    console.error("Login Error:", error);
-    alert(error.message);
-  }
-};
-</script>
-
-
+                if (!docSnap.exists()) {
+                    await setDoc(userRef, {
+                        name: user.displayName,
+                        email: user.email,
+                        uid: user.uid,
+                        photo: user.photoURL || "",
+                        createdAt: new Date().toISOString()
+                    });
+                }
+                window.location.href = "home.html";
+            } catch (error) {
+                alert("Login Error: " + error.message);
+                loader.style.display = "none";
+                loginBtn.style.display = "block";
+            }
+        };
+    </script>
 </body>
 </html>
