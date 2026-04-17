@@ -179,13 +179,27 @@
     <div onclick="menuClick('Read all')">Read all</div>
     <div onclick="menuClick('Settings')">Settings</div>
     </div>
-    <div id="chats-page" class="page active">
+        <div id="chats-page" class="page active">
         <div class="search-container">
             <div class="search-bar">
-                <i class="fas fa-bolt"></i>
+                <i class="fas fa-bolt" style="color:var(--accent)"></i>
                 <input type="text" placeholder="Ask Tyfenix AI...">
             </div>
         </div>
+
+        <div class="filters">
+            <div class="filter-chip active">All</div>
+            <div class="filter-chip">Unread</div>
+            <div class="filter-chip">Groups</div>
+        </div>
+
+        <div id="chat-list-container">
+            <div style="padding:40px; text-align:center; color:var(--text-dim); font-size:11px;">
+                Searching for secure connections...
+            </div>
+        </div>
+    </div>
+
         <div class="filters">
             <div class="filter-chip active" onclick="toggleFilter(this)">All</div>
             <div class="filter-chip" onclick="toggleFilter(this)">Unread</div>
