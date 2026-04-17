@@ -113,13 +113,18 @@
     </div>
 
     <script type="module">
-     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// 🔥 setPersistence और browserLocalPersistence इम्पोर्ट किया
+import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    setPersistence, 
+    browserLocalPersistence 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-// Firebase config (YOUR PROVIDED)
 const firebaseConfig = {
   apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
   authDomain: "indian-chat-61159.firebaseapp.com",
@@ -131,53 +136,47 @@ const firebaseConfig = {
   measurementId: "G-5S9873P202"
 };
 
-// Init Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Google Login
-window.googleLogin = function () {
+window.googleLogin = async function () {
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
 
-  provider.setCustomParameters({
-    prompt: "select_account"
-  });
+  try {
+    // 🛡️ 1. ये लाइन लॉगिन को हमेशा के लिए सेव कर देगी (जब तक Logout न करें)
+    await setPersistence(auth, browserLocalPersistence);
 
-    signInWithPopup(auth, provider)
-    .then(async (result) => {
-      const user = result.user;
+    // 2. अब पॉपअप दिखाओ
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-      // 1. यूजर के डॉक्यूमेंट का रेफरेंस लें (UID को ही ID बनायें)
-      const userRef = doc(db, "users", user.uid);
-      
-      // 2. चेक करें कि क्या यूजर पहले से मौजूद है?
-      const docSnap = await getDoc(userRef);
+    const userRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(userRef);
 
-      if (!docSnap.exists()) {
-        // अगर नया यूजर है, तभी डेटा सेव करें
-        await setDoc(userRef, {
-          name: user.displayName,
-          email: user.email,
-          uid: user.uid,
-          photo: user.photoURL || "",
-          createdAt: new Date().toISOString()
-        });
-        console.log("New User Account Created!");
-      } else {
-        console.log("Existing User Logged In.");
-      }
+    if (!docSnap.exists()) {
+      await setDoc(userRef, {
+        name: user.displayName,
+        email: user.email,
+        uid: user.uid,
+        photo: user.photoURL || "",
+        createdAt: new Date().toISOString()
+      });
+      console.log("New User Account Created!");
+    }
 
-      // 3. अब होम पेज पर भेजें
-      window.location.href = "home.html";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
-
+    // 3. होम पेज पर भेजें
+    window.location.href = "home.html";
+    
+  } catch (error) {
+    console.error("Login Error:", error);
+    alert(error.message);
+  }
 };
-    </script>
+</script>
+
 
 </body>
 </html>
