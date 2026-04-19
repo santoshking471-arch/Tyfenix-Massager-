@@ -139,7 +139,54 @@
             else chatListContainer.innerHTML = "<div style='padding:20px;text-align:center;'>Please Login</div>";
         });
 
-        
+        function loadChatList(myUid) {
+    const q = query(collection(db, "chats"));
+
+    onSnapshot(q, async (snapshot) => {
+        // Sirf apne chats filter karo
+        const myChats = snapshot.docs.filter(chatDoc => {
+            const data = chatDoc.data();
+            return data.users && data.users.includes(myUid);
+        });
+
+        if (myChats.length === 0) {
+            chatListContainer.innerHTML = "<div style='padding:40px; text-align:center; color:var(--text-dim); font-size:11px;'>Koi chat nahi mili</div>";
+            return;
+        }
+
+        // Sab chats ka data parallel fetch karo
+        const items = await Promise.all(myChats.map(async (chatDoc) => {
+            const data = chatDoc.data();
+            const otherUid = data.users.find(u => u !== myUid);
+
+            const uSnap = await getDoc(doc(db, "users", otherUid));
+            const uData = uSnap.exists() ? uSnap.data() : { name: "User", photo: "" };
+
+            const lastM = data.lastMessage || {};
+            const timeStr = lastM.time
+                ? new Date(lastM.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : '';
+
+            return { otherUid, uData, lastM, timeStr };
+        }));
+
+        // Ek baar mein render karo — koi flicker nahi
+        chatListContainer.innerHTML = items.map(({ otherUid, uData, lastM, timeStr }) => `
+            <div class="list-item" onclick="location.href='chat.html?uid=${otherUid}'">
+                <img src="${uData.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(uData.name || 'User')}" class="user-dp">
+                <div style="flex:1; min-width:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:14px; font-weight:600;">${uData.name || 'User'}</span>
+                        <span style="font-size:9px; color:var(--text-dim);">${timeStr}</span>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px;">
+                        ${lastM.text || 'Start chatting...'}
+                    </p>
+                </div>
+            </div>
+        `).join('');
+    });
+                            }
 
         async function renderChatItem(chatId, otherUid, myUid) {
             const uSnap = await getDoc(doc(db, "users", otherUid));
