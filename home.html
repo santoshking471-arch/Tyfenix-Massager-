@@ -36,6 +36,61 @@
         .filters { display: flex; gap: 6px; padding: 2px 12px 8px; overflow-x: auto; flex-shrink: 0; }
         .filter-chip { padding: 3px 10px; border-radius: 8px; font-size: 11px; color: var(--text-dim); border: 1px solid #1e293b; white-space: nowrap; }
         .filter-chip.active { background: var(--accent); color: #000; font-weight: 600; }
+        /* Container for the list */
+.user-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+}
+
+/* Single User Item */
+.user {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    border-radius: 12px; /* Smooth corners */
+    transition: all 0.3s ease; /* Smooth hover effect */
+    cursor: pointer;
+}
+
+.user:hover {
+    background: rgba(255, 255, 255, 0.05); /* Subtle highlight on hover */
+}
+
+.user:active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* DP Box with better shadow */
+.dp-box { 
+    width: 45px; height: 45px; 
+    border-radius: 50%; /* Circle DP */
+    overflow: hidden; 
+    flex-shrink: 0; 
+    border: 1.5px solid rgba(255,255,255,0.1);
+}
+
+.u-info { flex: 1; min-width: 0; }
+.u-info .name { 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #fff;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; /* ... agar naam lamba ho */
+}
+
+.u-info .status-txt { 
+    font-size: 11px; 
+    color: var(--dim); 
+    margin-top: 2px;
+}
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4a5a67; }
+.status-dot.active { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+
 
         /* FAB & Nav */
         .fab { position: fixed; bottom: 75px; right: 15px; background: linear-gradient(135deg, var(--accent), var(--purple)); width: 45px; height: 45px; border-radius: 14px; display: flex; justify-content: center; align-items: center; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
@@ -85,10 +140,26 @@
             <i class="fas fa-robot" style="color: #00f2fe; margin-right: 8px;"></i> Open Tyfenix AI
         </div>
 
-        <div id="chat-list-container">
-            <div style="padding:40px; text-align:center; color:var(--text-dim); font-size:11px;">Syncing Neural Chats...</div>
+        <div class="user-list-container">
+    <div class="user">
+        <div class="dp-box"><img src="user1.jpg" alt="DP"></div>
+        <div class="u-info">
+            <div class="name">Sakkad Kushwaha</div>
+            <div class="status-txt">Online</div>
         </div>
+        <div class="status-dot active"></div>
     </div>
+
+    <div class="user">
+        <div class="dp-box"><img src="user2.jpg" alt="DP"></div>
+        <div class="u-info">
+            <div class="name">Friend Name</div>
+            <div class="status-txt">Offline</div>
+        </div>
+        <div class="status-dot"></div>
+    </div>
+</div>
+
 
     <div id="explore-page" class="page"><div style="padding:40px; text-align:center;">Explore AI Models</div></div>
     <div id="groups-page" class="page"><div style="padding:40px; text-align:center;">Community Groups</div></div>
