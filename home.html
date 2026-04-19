@@ -139,50 +139,7 @@
             else chatListContainer.innerHTML = "<div style='padding:20px;text-align:center;'>Please Login</div>";
         });
 
-        function loadChatList(myUid) {
-
-    const q = query(collection(db, "chats"));
-
-    onSnapshot(q, (snapshot) => {
-
-        chatListContainer.innerHTML = "";
-
-        snapshot.forEach(async (chatDoc) => {
-
-            const data = chatDoc.data();
-
-            // ✅ FIX: participants use karo
-            if (!data.users || !data.users.includes(myUid)) return;
-
-            const otherUid = data.users.find(u => u !== myUid);
-
-            // user data
-            const uSnap = await getDoc(doc(db, "users", otherUid));
-            const uData = uSnap.data() || { name: "User" };
-
-            const lastM = data.lastMessage || {};
-
-            const html = `
-                <div class="list-item" onclick="location.href='chat.html?uid=${otherUid}'">
-                    <img src="${uData.photo || 'https://ui-avatars.com/api/?name='+uData.name}" class="user-dp">
-                    <div style="flex:1;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <span>${uData.name}</span>
-                            <span style="font-size:10px; color:gray;">
-                                ${lastM.time ? new Date(lastM.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}
-                            </span>
-                        </div>
-                        <p style="font-size:12px; color:gray;">
-                            ${lastM.text || 'Start chatting...'}
-                        </p>
-                    </div>
-                </div>
-            `;
-
-            chatListContainer.insertAdjacentHTML("beforeend", html);
-        });
-    });
-        }
+        
 
         async function renderChatItem(chatId, otherUid, myUid) {
             const uSnap = await getDoc(doc(db, "users", otherUid));
