@@ -192,31 +192,7 @@
         });
         }
 
-        async function renderChatItem(chatId, otherUid, myUid) {
-            const uSnap = await getDoc(doc(db, "users", otherUid));
-            const uData = uSnap.data() || { name: "User" };
-            const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "desc"), limit(1));
-            onSnapshot(q, (mSnap) => {
-                const lastM = mSnap.docs[0]?.data();
-                const old = document.getElementById("chat-" + chatId);
-                if(old) old.remove();
-
-                const html = `
-                    <div class="list-item" id="chat-${chatId}" onclick="location.href='chat.html?uid=${otherUid}'">
-                        <img src="${uData.photo || 'https://ui-avatars.com/api/?name='+uData.name}" class="user-dp">
-                        <div style="flex:1; min-width:0;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:14px; font-weight:600;">${uData.name}</span>
-                                <span style="font-size:9px; color:var(--text-dim);">${lastM ? new Date(lastM.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</span>
-                            </div>
-                            <p style="font-size:12px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px;">
-                                ${lastM ? lastM.text : 'New chat'}
-                            </p>
-                        </div>
-                    </div>`;
-                chatListContainer.insertAdjacentHTML('afterbegin', html);
-            });
-        }
+        
 
         // --- Menu & Tab Functions ---
         const menuBtn = document.getElementById('menuBtn');
