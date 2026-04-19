@@ -138,56 +138,59 @@
             if (user) loadChatList(user.uid);
             else chatListContainer.innerHTML = "<div style='padding:20px;text-align:center;'>Please Login</div>";
         });
-        
-function loadChatList(myUid) {
-    const q = query(collection(db, "chats"));
+        function loadMyContacts(myUid) {
+        // ✅ ध्यान दें: path 'users/UID/contacts' ही होना चाहिए
+        const contactsRef = collection(db, "users", myUid, "contacts");
 
-    onSnapshot(q, async (snapshot) => {
-        // Sirf apne chats filter karo
-        const myChats = snapshot.docs.filter(chatDoc => {
-            const data = chatDoc.data();
-            return data.users && data.users.includes(myUid);
+        onSnapshot(contactsRef, (snap) => {
+            listDiv.innerHTML = ""; 
+
+            if (snap.empty) {
+                listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--dim); font-size:11px;">No connections in your network.</div>`;
+                return;
+            }
+            
+            snap.forEach(cDoc => {
+                const cData = cDoc.data();
+                const targetUid = cData.uid;
+
+                // दोस्त की प्रोफाइल डिटेल्स
+                onSnapshot(doc(db, "users", targetUid), (uSnap) => {
+                    if(!uSnap.exists()) return;
+                    
+                    const gData = uSnap.data();
+                    const existing = document.getElementById("u-" + targetUid);
+                    const isOnline = gData?.status === 'online';
+
+                    const html = `
+                        <div class="dp-box">
+                            <img src="${gData?.photo || 'https://ui-avatars.com/api/?name=' + cData.name + '&background=0D141A&color=00F2C3'}">
+                        </div>
+                        <div class="u-info">
+                            <div class="name">${cData.name || "Unknown"}</div>
+                            <div class="status-txt">${isOnline ? 'Active Now' : 'Offline'}</div>
+                        </div>
+                        <div class="status-dot ${isOnline ? 'active' : ''}"></div>
+                    `;
+
+                    if (existing) {
+                        existing.innerHTML = html;
+                    } else {
+                        const div = document.createElement("div");
+                        div.className = "user";
+                        div.id = "u-" + targetUid;
+                        div.onclick = () => window.location.href = `chat.html?uid=${targetUid}`;
+                        div.innerHTML = html;
+                        listDiv.appendChild(div);
+                    }
+                });
+            });
+        }, (err) => {
+            console.error("Rules Error:", err);
+            // ✅ अगर एरर आता है, तो यहाँ साफ़ दिखेगा क्यों आ रहा है
+            listDiv.innerHTML = `<div style="color:#ff0055; font-size:10px; text-align:center; padding:20px;">System Error: ${err.message}</div>`;
         });
-
-        if (myChats.length === 0) {
-            chatListContainer.innerHTML = "<div style='padding:40px; text-align:center; color:var(--text-dim); font-size:11px;'>Koi chat nahi mili</div>";
-            return;
         }
-
-        // Sab chats ka data parallel fetch karo
-        const items = await Promise.all(myChats.map(async (chatDoc) => {
-            const data = chatDoc.data();
-            const otherUid = data.users.find(u => u !== myUid);
-
-            const uSnap = await getDoc(doc(db, "users", otherUid));
-            const uData = uSnap.exists() ? uSnap.data() : { name: "User", photo: "" };
-
-            const lastM = data.lastMessage || {};
-            const timeStr = lastM.time
-                ? new Date(lastM.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                : '';
-
-            return { otherUid, uData, lastM, timeStr };
-        }));
-
-        // Ek baar mein render karo — koi flicker nahi
-        chatListContainer.innerHTML = items.map(({ otherUid, uData, lastM, timeStr }) => `
-            <div class="list-item" onclick="location.href='chat.html?uid=${otherUid}'">
-                <img src="${uData.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(uData.name || 'User')}" class="user-dp">
-                <div style="flex:1; min-width:0;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:14px; font-weight:600;">${uData.name || 'User'}</span>
-                        <span style="font-size:9px; color:var(--text-dim);">${timeStr}</span>
-                    </div>
-                    <p style="font-size:12px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px;">
-                        ${lastM.text || 'Start chatting...'}
-                    </p>
-                </div>
-            </div>
-        `).join('');
-    });
-}
-        
 
         async function renderChatItem(chatId, otherUid, myUid) {
             const uSnap = await getDoc(doc(db, "users", otherUid));
