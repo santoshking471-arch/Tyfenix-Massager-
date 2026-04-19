@@ -128,12 +128,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const chatListContainer = document.getElementById("chat-list-container");
+        const listDiv = document.getElementById("list");
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) loadChatList(user.uid);
-            else chatListContainer.innerHTML = "<div style='padding:20px;text-align:center;'>Please Login</div>";
-        });
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            console.log("Logged in as:", user.uid);
+            loadMyContacts(user.uid);
+        } else {
+            listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--dim); font-size:11px;">Access Denied: Please login first.</div>`;
+        }
+    });
         function loadMyContacts(myUid) {
         // ✅ ध्यान दें: path 'users/UID/contacts' ही होना चाहिए
         const contactsRef = collection(db, "users", myUid, "contacts");
