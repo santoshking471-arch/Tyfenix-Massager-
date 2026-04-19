@@ -138,8 +138,8 @@
             if (user) loadChatList(user.uid);
             else chatListContainer.innerHTML = "<div style='padding:20px;text-align:center;'>Please Login</div>";
         });
-
-        function loadChatList(myUid) {
+        
+function loadChatList(myUid) {
     const q = query(collection(db, "chats"));
 
     onSnapshot(q, async (snapshot) => {
@@ -186,7 +186,8 @@
             </div>
         `).join('');
     });
-                            }
+}
+        
 
         async function renderChatItem(chatId, otherUid, myUid) {
             const uSnap = await getDoc(doc(db, "users", otherUid));
