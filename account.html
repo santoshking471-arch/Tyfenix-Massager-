@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: #f8f9fa; padding: 12px; color: #333; }
+
+        /* Header */
+        .header { padding: 10px 5px 15px 5px; font-size: 18px; font-weight: 600; display: flex; align-items: center; }
+        .back-icon { margin-right: 15px; cursor: pointer; }
+
+        /* Slim Card Style (Wahi favourite look) */
+        .card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #f0f0f0;
+        }
+        .card:active { transform: scale(0.98); background: #fdfdfd; }
+
+        .icon { font-size: 20px; color: #555; margin-right: 18px; }
+        .text-only { font-size: 14px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="material-symbols-rounded back-icon" onclick="history.back()">arrow_back</span>
+        <span>Account</span>
+    </div>
+
+    <div class="card" onclick="alert('Security notifications clicked')">
+        <span class="material-symbols-rounded icon">shield</span>
+        <div class="text-only">Security notifications</div>
+    </div>
+    <div class="card" onclick="alert('Passkeys clicked')">
+        <span class="material-symbols-rounded icon">key</span>
+        <div class="text-only">Passkeys</div>
+    </div>
+    <div class="card" onclick="alert('Email address clicked')">
+        <span class="material-symbols-rounded icon">mail</span>
+        <div class="text-only">Email address</div>
+    </div>
+    <div class="card" onclick="alert('Two-step verification clicked')">
+        <span class="material-symbols-rounded icon">password</span>
+        <div class="text-only">Two-step verification</div>
+    </div>
+    <div class="card" onclick="alert('Change phone number clicked')">
+        <span class="material-symbols-rounded icon">stay_current_portrait</span>
+        <div class="text-only">Change phone number</div>
+    </div>
+    <div class="card" onclick="location.href='request-info.html'">
+        <span class="material-symbols-rounded icon">description</span>
+        <div class="text-only">Request account info</div>
+    </div>
+    <div class="card" onclick="alert('Ad preferences clicked')">
+        <span class="material-symbols-rounded icon">tune</span>
+        <div class="text-only">Ad preferences in Accounts Centre</div>
+    </div>
+    <div class="card" onclick="alert('Add account clicked')">
+        <span class="material-symbols-rounded icon">person_add</span>
+        <div class="text-only">Add account</div>
+    </div>
+    <div class="card" onclick="alert('Delete account clicked')" style="color: #d93025;">
+        <span class="material-symbols-rounded icon" style="color: #d93025;">delete</span>
+        <div class="text-only">Delete account</div>
+    </div>
+
+</body>
+</html>
