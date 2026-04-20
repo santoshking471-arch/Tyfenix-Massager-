@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: #f8f9fa; padding: 12px; color: #333; }
+        .header { padding: 10px 5px 20px 5px; font-weight: 600; display: flex; align-items: center; }
+        
+        /* Avatar Container */
+        .avatar-box { text-align: center; margin-bottom: 20px; }
+        .avatar-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .edit-text { color: #00a884; font-size: 14px; cursor: pointer; }
+
+        /* Input Card Style */
+        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card label { font-size: 11px; color: #00a884; font-weight: 600; }
+        .card input { width: 100%; border: none; outline: none; font-size: 14px; margin-top: 5px; color: #333; }
+        
+        .save-btn { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 12px; font-weight: 600; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="material-symbols-rounded" style="margin-right:15px; cursor:pointer" onclick="history.back()">arrow_back</span>
+        <span>Profile</span>
+    </div>
+
+    <div class="avatar-box">
+        <img src="https://via.placeholder.com/150" id="profileImg" class="avatar-img">
+        <div class="edit-text" onclick="alert('Change photo logic')">Edit</div>
+    </div>
+
+    <div class="card">
+        <label>NAME</label>
+        <input type="text" id="nameInput" placeholder="Enter your name">
+    </div>
+
+    <div class="card">
+        <label>ABOUT</label>
+        <input type="text" id="aboutInput" placeholder="About you">
+    </div>
+
+    <div class="card">
+        <label>PHONE</label>
+        <input type="text" id="phoneInput" disabled>
+    </div>
+
+    <button class="save-btn" onclick="saveProfile()">SAVE PROFILE</button>
+
+    <script>
+        // Firebase Config (Apni details yahan dalein)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            projectId: "YOUR_PROJECT_ID",
+            // Add other config here
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Data Save Function
+        function saveProfile() {
+            const name = document.getElementById('nameInput').value;
+            const about = document.getElementById('aboutInput').value;
+
+            db.collection("profile").doc("user123").set({
+                name: name,
+                about: about,
+                updatedAt: new Date()
+            }, { merge: true }) // merge: true se agar data pehle se hai to update hoga, nahi to create.
+            .then(() => alert("Profile Saved Successfully!"))
+            .catch((err) => alert("Error: " + err));
+        }
+    </script>
+</body>
+</html>
