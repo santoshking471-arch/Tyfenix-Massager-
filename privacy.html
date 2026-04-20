@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Settings</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; text-decoration: none; }
+        body { background-color: #f8f9fa; padding: 12px; color: #333; }
+
+        .header { padding: 10px 5px 15px 5px; font-size: 18px; font-weight: 600; display: flex; align-items: center; }
+        .back-icon { margin-right: 15px; cursor: pointer; }
+
+        /* Highlighted Box */
+        .checkup-box { background: #e8f5e9; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #c8e6c9; cursor: pointer; }
+        .checkup-box h3 { font-size: 14px; color: #2e7d32; margin-bottom: 4px; }
+        .checkup-box p { font-size: 12px; color: #388e3c; }
+
+        /* Slim Card Style */
+        .card {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #ffffff; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;
+            cursor: pointer; transition: 0.2s;
+        }
+        .card:active { transform: scale(0.98); background: #fdfdfd; }
+        .text-box h3 { font-size: 13px; font-weight: 600; }
+        .text-box p { font-size: 10px; color: #888; margin-top: 1px; }
+
+        /* Toggle */
+        .switch { width: 36px; height: 20px; background: #ccc; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
+        .circle { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s; }
+        .switch.on { background: #4caf50; }
+        .switch.on .circle { left: 18px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="material-symbols-rounded back-icon" onclick="history.back()">arrow_back</span>
+        <span>Privacy</span>
+    </div>
+
+    <div class="checkup-box">
+        <h3>Privacy checkup</h3>
+        <p>Control your privacy and choose the right settings.</p>
+    </div>
+
+    <div class="card" onclick="location.href='last-seen.html'">
+        <div class="text-box"><h3>Last seen and online</h3><p>Nobody</p></div>
+    </div>
+    <div class="card" onclick="location.href='profile-photo.html'">
+        <div class="text-box"><h3>Profile photo</h3><p>Nobody</p></div>
+    </div>
+    <div class="card" onclick="location.href='about.html'">
+        <div class="text-box"><h3>About</h3><p>Nobody</p></div>
+    </div>
+    <div class="card" onclick="location.href='links.html'">
+        <div class="text-box"><h3>Links</h3><p>Nobody</p></div>
+    </div>
+    <div class="card" onclick="location.href='status.html'">
+        <div class="text-box"><h3>Status</h3><p>My contacts</p></div>
+    </div>
+    
+    <div class="card">
+        <div class="text-box"><h3>Read receipts</h3><p>If turned off, you won't send/receive them.</p></div>
+        <div class="switch on" onclick="this.classList.toggle('on')"><div class="circle"></div></div>
+    </div>
+
+    <div class="card" onclick="location.href='timer.html'">
+        <div class="text-box"><h3>Default message timer</h3><p>Off</p></div>
+    </div>
+    <div class="card" onclick="location.href='groups.html'">
+        <div class="text-box"><h3>Groups</h3><p>Everyone</p></div>
+    </div>
+    <div class="card" onclick="location.href='stickers.html'">
+        <div class="text-box"><h3>Avatar stickers</h3><p>My contacts</p></div>
+    </div>
+    <div class="card" onclick="location.href='live-loc.html'">
+        <div class="text-box"><h3>Live location</h3><p>None</p></div>
+    </div>
+    <div class="card" onclick="location.href='calls.html'">
+        <div class="text-box"><h3>Calls</h3><p>Silence unknown callers</p></div>
+    </div>
+    <div class="card" onclick="location.href='blocked.html'">
+        <div class="text-box"><h3>Blocked contacts</h3><p>Manage WhatsApp contacts</p></div>
+    </div>
+    <div class="card" onclick="location.href='applock.html'">
+        <div class="text-box"><h3>App lock</h3><p>Disabled</p></div>
+    </div>
+    
+    <div class="card">
+        <div class="text-box"><h3>Allow camera effects</h3><p>Use effects in camera and video calls.</p></div>
+        <div class="switch" onclick="this.classList.toggle('on')"><div class="circle"></div></div>
+    </div>
+    
+    <div class="card" onclick="location.href='advanced.html'">
+        <div class="text-box"><h3>Advanced</h3><p>Protect IP address in calls, Disable link previews</p></div>
+    </div>
+
+</body>
+</html>
