@@ -2,63 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Profile</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #e5ddd5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        
-        .container { width: 100%; max-width: 400px; background: #ffffff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
-        /* DP section */
-        .header-profile { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
-        .dp { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #008069; margin-bottom: 15px; }
-        
-        h2 { color: #111b21; font-size: 22px; }
-        .email { color: #54656f; font-size: 14px; margin-bottom: 5px; }
-        
-        /* Bio Section */
-        .bio { background: #f0f2f5; padding: 15px; border-radius: 10px; font-size: 14px; color: #3b4a54; margin-bottom: 20px; text-align: center; }
-        
-        /* Options (WhatsApp style) */
-        .option-item { display: flex; align-items: center; padding: 12px 0; border-top: 1px solid #f2f2f2; cursor: pointer; color: #dc2626; font-weight: 500; font-size: 15px; }
-        .option-item span { margin-right: 15px; color: #54656f; }
-        .report { color: #ea580c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #fafafa; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { width: 300px; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .avatar { text-align: center; margin-bottom: 15px; }
+        .dp { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
+        .info { text-align: center; margin-bottom: 20px; }
+        .name { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+        .email { font-size: 11px; color: #999; margin-top: 2px; }
+        .opt { display: flex; align-items: center; padding: 10px; margin-bottom: 5px; background: #fff; 
+               border: 1px solid #f0f0f0; border-radius: 10px; cursor: pointer; font-size: 13px; color: #333; transition: 0.2s; }
+        .opt:active { background: #f0f0f0; }
+        .opt span { font-size: 14px; margin-right: 10px; }
+        .danger { color: #ff3b30; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header-profile">
-            <img src="https://via.placeholder.com/150" id="dp" class="dp">
-            <h2 id="name">Loading...</h2>
-            <p class="email" id="email">Loading...</p>
-        </div>
-
-        <div class="bio" id="bio">Loading bio...</div>
-
-        <div class="option-item" onclick="blockUser()"><span>block</span> Block User</div>
-        <div class="option-item report" onclick="reportUser()"><span>report</span> Report User</div>
+<div class="card">
+    <div class="avatar"><img src="https://via.placeholder.com/150" id="dp" class="dp"></div>
+    <div class="info">
+        <h2 class="name" id="name">Loading...</h2>
+        <p class="email" id="email">---</p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    <div class="opt" onclick="action('zoom')"><span>🔍</span> Zoom Lock</div>
+    <div class="opt" onclick="action('priv')"><span>🔒</span> Privacy</div>
+    <div class="opt danger" onclick="action('block')"><span>🚫</span> Block User</div>
+    <div class="opt danger" onclick="action('report')"><span>📢</span> Report User</div>
+</div>
 
-        const firebaseConfig = { /* Apna config yahan paste karein */ };
-        const db = getFirestore(initializeApp(firebaseConfig));
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        async function loadData(uid) {
-            const snap = await getDoc(doc(db, "users", uid));
-            if (snap.exists()) {
-                const d = snap.data();
+    // --- YE RAHI CONFIG KI JAGAH ---
+    // Apne Firebase Console mein jao -> Project Settings -> SDK Setup -> Config
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    const db = getFirestore(initializeApp(firebaseConfig));
+
+    window.action = (type) => {
+        if(type === 'zoom') alert("Zoom Locked!");
+        if(type === 'priv') alert("Privacy Settings Opened");
+        if(type === 'block') alert("User Blocked");
+        if(type === 'report') alert("User Reported");
+    };
+
+    async function load(uid) {
+        try {
+            const s = await getDoc(doc(db, "users", uid));
+            if (s.exists()) {
+                const d = s.data();
                 document.getElementById('name').innerText = d.name;
                 document.getElementById('email').innerText = d.email;
-                document.getElementById('bio').innerText = d.bio;
                 document.getElementById('dp').src = d.profilePic;
             }
-        }
-        loadData("USER_ID_YAHAN_DAALEIN");
-    </script>
+        } catch(e) { console.log("Firebase Error"); }
+    }
+    load("USER_ID_YAHAN_DALEIN");
+</script>
 </body>
 </html>
