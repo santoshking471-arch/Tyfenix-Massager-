@@ -53,36 +53,37 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Data fetch karne wala function
+    // Ye function database se data layega
     async function fetchUserData(uid) {
         try {
             const userDoc = await getDoc(doc(db, "users", uid));
             if (userDoc.exists()) {
-                const data = userDoc.data();
-                // UI update
-                document.getElementById('name').innerText = data.name || "N/A";
-                document.getElementById('email').innerText = data.email || "N/A";
-                document.getElementById('dp').src = data.profilePic || "https://via.placeholder.com/150";
-            } else {
-                console.log("Database mein user ka data nahi mila.");
+                const d = userDoc.data();
+                document.getElementById('name').innerText = d.name || "User";
+                document.getElementById('email').innerText = d.email || "";
+                document.getElementById('dp').src = d.profilePic || "https://via.placeholder.com/150";
             }
-        } catch(e) {
-            console.error("Error fetching data:", e);
+        } catch(e) { 
+            console.error("Firebase Error:", e); 
         }
     }
 
-    // Page load hote hi ye check karega ki user logged-in hai ya nahi
+    // Auto-login check
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Agar login hai, to uska UID lekar data fetch karein
+            // Agar user login hai, to uska UID use karke data fetch karo
             fetchUserData(user.uid);
         } else {
-            console.log("User login nahi hai.");
-            document.getElementById('name').innerText = "Guest User";
+            document.getElementById('name').innerText = "Not Logged In";
         }
     });
 
-
+    window.action = (type) => {
+        if(type === 'zoom') alert("Zoom Locked!");
+        if(type === 'priv') alert("Privacy Settings Opened");
+        if(type === 'block') alert("User Blocked");
+        if(type === 'report') alert("User Reported");
+    };
 </script>
 </body>
 </html>
