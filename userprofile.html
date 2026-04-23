@@ -38,39 +38,42 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    // --- YE RAHI CONFIG KI JAGAH ---
-    // Apne Firebase Console mein jao -> Project Settings -> SDK Setup -> Config
     const firebaseConfig = {
-            apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
-            authDomain: "indian-chat-61159.firebaseapp.com",
-            projectId: "indian-chat-61159",
-            storageBucket: "indian-chat-61159.firebasestorage.app",
-            messagingSenderId: "584142839677",
-            appId: "1:584142839677:web:40cd744a7fe77dc743f614"
-        };
-
-    const db = getFirestore(initializeApp(firebaseConfig));
-
-    window.action = (type) => {
-        if(type === 'zoom') alert("Zoom Locked!");
-        if(type === 'priv') alert("Privacy Settings Opened");
-        if(type === 'block') alert("User Blocked");
-        if(type === 'report') alert("User Reported");
+        apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
+        authDomain: "indian-chat-61159.firebaseapp.com",
+        projectId: "indian-chat-61159",
+        storageBucket: "indian-chat-61159.firebasestorage.app",
+        messagingSenderId: "584142839677",
+        appId: "1:584142839677:web:40cd744a7fe77dc743f614"
     };
 
-    async function load(uid) {
-        try {
-            const s = await getDoc(doc(db, "users", uid));
-            if (s.exists()) {
-                const d = s.data();
-                document.getElementById('name').innerText = d.name;
-                document.getElementById('email').innerText = d.email;
-                document.getElementById('dp').src = d.profilePic;
-            }
-        } catch(e) { console.log("Firebase Error"); }
-    }
-    load("USER_ID_YAHAN_DALEIN");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Login function
+    window.login = () => {
+        signInWithPopup(auth, provider).then((result) => {
+            const user = result.user;
+            // UI Update
+            document.getElementById('name').innerText = user.displayName;
+            document.getElementById('email').innerText = user.email;
+            document.getElementById('dp').src = user.photoURL;
+        }).catch((error) => {
+            alert("Login Failed: " + error.message);
+        });
+    };
+</script>
+
+<div class="info">
+    <h2 class="name" id="name">Login nahi hai</h2>
+    <p class="email" id="email">---</p>
+    <button onclick="login()">Google se Login karein</button>
+</div>
+
 </script>
 </body>
 </html>
