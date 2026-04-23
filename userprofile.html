@@ -38,7 +38,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCAzhJoQqoQ1xOEty_q2nLA5BjQcpyOMCA",
@@ -52,27 +52,36 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
 
-    // Login function
-    window.login = () => {
-        signInWithPopup(auth, provider).then((result) => {
-            const user = result.user;
-            // UI Update
-            document.getElementById('name').innerText = user.displayName;
-            document.getElementById('email').innerText = user.email;
-            document.getElementById('dp').src = user.photoURL;
-        }).catch((error) => {
-            alert("Login Failed: " + error.message);
-        });
-    };
-</script>
+    // Data fetch karne wala function
+    async function fetchUserData(uid) {
+        try {
+            const userDoc = await getDoc(doc(db, "users", uid));
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                // UI update
+                document.getElementById('name').innerText = data.name || "N/A";
+                document.getElementById('email').innerText = data.email || "N/A";
+                document.getElementById('dp').src = data.profilePic || "https://via.placeholder.com/150";
+            } else {
+                console.log("Database mein user ka data nahi mila.");
+            }
+        } catch(e) {
+            console.error("Error fetching data:", e);
+        }
+    }
 
-<div class="info">
-    <h2 class="name" id="name">Login nahi hai</h2>
-    <p class="email" id="email">---</p>
-    <button onclick="login()">Google se Login karein</button>
-</div>
+    // Page load hote hi ye check karega ki user logged-in hai ya nahi
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Agar login hai, to uska UID lekar data fetch karein
+            fetchUserData(user.uid);
+        } else {
+            console.log("User login nahi hai.");
+            document.getElementById('name').innerText = "Guest User";
+        }
+    });
+
 
 </script>
 </body>
